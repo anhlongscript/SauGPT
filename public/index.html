@@ -2,119 +2,18 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Sâu🐛GPT Chat</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    #chatBox {
-      width: 90%;
-      max-width: 600px;
-      height: 70vh;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      overflow-y: auto;
-      background: #fff;
-      margin-top: 20px;
-    }
-    .message {
-      margin: 5px 0;
-      padding: 8px 10px;
-      border-radius: 6px;
-    }
-    .user {
-      background: #d1e7ff;
-      text-align: right;
-    }
-    .bot {
-      background: #e9ffe1;
-      text-align: left;
-    }
-    #inputArea {
-      margin-top: 10px;
-      width: 90%;
-      max-width: 600px;
-      display: flex;
-    }
-    #userInput {
-      flex: 1;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    #sendBtn {
-      margin-left: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-    #sendBtn:hover {
-      background: #0056b3;
-    }
-  </style>
+  <title>Sâu🐛GPT</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>💬 Chat với Sâu🐛GPT</h2>
-  <div id="chatBox"></div>
-  <div id="inputArea">
-    <input id="userInput" type="text" placeholder="Nhập tin nhắn..." />
-    <button id="sendBtn">Gửi</button>
+  <div id="app">
+    <h2>Tôi là trợ lý AI thông minh <b>Sâu🐛GPT</b></h2>
+    <div id="chat-box"></div>
+    <div id="input-area">
+      <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
+      <button id="send-btn">Gửi</button>
+    </div>
   </div>
-
-  <script>
-    const chatBox = document.getElementById("chatBox");
-    const input = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-
-    function addMessage(sender, text, isUser = false) {
-      const msg = document.createElement("div");
-      msg.classList.add("message");
-      msg.classList.add(isUser ? "user" : "bot");
-      msg.innerHTML = `<b>${sender}:</b> ${text}`;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    async function sendMessage() {
-      const message = input.value.trim();
-      if (!message) return;
-
-      addMessage("Bạn", message, true);
-      input.value = "";
-
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
-        });
-
-        const data = await res.json();
-
-        if (data.reply) {
-          addMessage("Sâu🐛GPT", data.reply, false);
-        } else {
-          addMessage("Sâu🐛GPT", "❌ Lỗi: Không nhận được phản hồi.", false);
-        }
-      } catch (err) {
-        addMessage("Sâu🐛GPT", "❌ Lỗi: Server không phản hồi.", false);
-      }
-    }
-
-    sendBtn.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
