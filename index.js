@@ -1,50 +1,52 @@
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import OpenAI from "openai";
+import bodyParser from "body-parser";
+import fetch from "node-fetch";
 import dotenv from "dotenv";
 
 dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Cấu hình OpenAI
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+app.use(bodyParser.json());
+app.use(express.static("public"));
 
-// ✅ Middleware
-app.use(express.json());
-
-// ✅ Lấy đường dẫn thư mục hiện tại
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ✅ Serve file tĩnh từ thư mục public
-app.use(express.static(path.join(__dirname, "public")));
-
-// ✅ API Chat
-app.post("/api/chat", async (req, res) => {
+// API chat route
+app.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, image } = req.body;
 
-    const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "Bạn là Sâu🐛GPT, luôn trả lời thân thiện." },
-        { role: "user", content: message }
-      ],
+    // gọi OpenAI API
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "Bạn là Sâu🐛GPT, trả lời thân thiện, có chút hài hước." },
+          { role: "user", content: message },
+          ...(image ? [{ role: "user", content: `Ảnh người dùng gửi: ${image}` }] : [])
+        ],
+      }),
     });
 
-    res.json({ reply: response.choices[0].message.content });
-  } catch (error) {
-    console.error("OpenAI error:", error);
-    res.status(500).json({ reply: "❌ Lỗi: Server không phản hồi." });
+    const data = await response.json();
+
+    if (data.error) {
+      return res.json({ reply: "❌ Lỗi: " + data.error.message });
+    }
+
+    const reply = data.choices[0].message.content;
+    res.json({ reply });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ reply: "❌ Lỗi: Server không phản hồi." });
   }
 });
 
-// ✅ Khởi động server
 app.listen(PORT, () => {
-  console.log(`✅ Server chạy tại http://localhost:${PORT}`);
+  console.log(`✅ Sâu🐛GPT chạy tại cổng ${PORT}`);
 });
