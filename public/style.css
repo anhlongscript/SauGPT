@@ -1,32 +1,30 @@
 body {
+  background: #111;
+  color: white;
   font-family: Arial, sans-serif;
-  margin: 20px;
 }
-
-#chatBox {
-  border: 1px solid #ccc;
+#app {
+  width: 600px;
+  margin: 30px auto;
+}
+#chat-box {
+  background: #222;
   padding: 10px;
-  max-width: 600px;
-  background: #fafafa;
-}
-
-#messages {
-  max-height: 400px;
+  height: 400px;
   overflow-y: auto;
+  border-radius: 5px;
   margin-bottom: 10px;
 }
-
-.msg {
-  margin: 5px 0;
-  padding: 5px;
+#input-area {
+  display: flex;
 }
-
-.msg.user {
-  text-align: right;
-  color: blue;
+#user-input {
+  flex: 1;
+  padding: 10px;
 }
-
-.msg.bot {
-  text-align: left;
-  color: green;
+#send-btn {
+  background: purple;
+  color: white;
+  border: none;
+  padding: 10px 20px;
 }
