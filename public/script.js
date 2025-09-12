@@ -1,38 +1,36 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("chat-form");
-  const input = document.getElementById("user-input");
-  const messages = document.getElementById("messages");
+  const form = document.getElementById("chatForm");
+  const input = document.getElementById("userInput");
+  const box = document.getElementById("messages");
+
+  function add(sender, text) {
+    const el = document.createElement("div");
+    el.className = sender === "Bạn" ? "msg user" : "msg bot";
+    el.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const message = input.value.trim();
+    if (!message) return;
 
-    const userMessage = input.value.trim();
-    if (!userMessage) return;
-
-    // hiển thị tin nhắn user
-    addMessage("Bạn", userMessage);
+    add("Bạn", message);
     input.value = "";
 
     try {
-      const res = await fetch("/chat", {
+      const resp = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message })
       });
 
-      const data = await res.json();
-      addMessage("SâuGPT", data.reply || "❌ Có lỗi xảy ra, thử lại nhé.");
+      const data = await resp.json().catch(() => ({ error: "Invalid JSON" }));
+      if (resp.ok && data.reply) add("SâuGPT", data.reply);
+      else add("SâuGPT", "❌ Lỗi: " + (data.error || "Không rõ"));
     } catch (err) {
-      console.error(err);
-      addMessage("SâuGPT", "❌ Lỗi server rồi bro!");
+      add("SâuGPT", "❌ Kết nối server thất bại");
     }
   });
-
-  function addMessage(sender, text) {
-    const msg = document.createElement("div");
-    msg.className = "message";
-    msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
-  }
 });
