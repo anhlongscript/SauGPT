@@ -1,39 +1,74 @@
+// index.js
 import express from "express";
-import fetch from "node-fetch";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 👉 Dán thẳng key vào đây
-const OPENAI_API_KEY = "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";
-
-app.use(express.static("public"));
+// dùng cho post json
 app.use(express.json());
+// cho phép load file tĩnh trong /public
+app.use(express.static(path.join(__dirname, "public")));
+
+const OPENAI_KEY = process.env.OPENAI_API_KEY || ""; 
+
+if (!OPENAI_KEY) {
+  console.error("⚠️ OPENAI_API_KEY chưa được set. Hãy vào Render → Environment → Add var.");
+}
 
 app.post("/chat", async (req, res) => {
   try {
     const { message } = req.body;
+    if (!message) return res.status(400).json({ error: "Missing message" });
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    console.log("📩 Nhận tin nhắn:", message);
+
+    const payload = {
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "Bạn là SâuGPT, một chatbot vui vẻ, ngắn gọn." },
+        { role: "user", content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    };
+
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_KEY}`
       },
-      body: JSON.stringify({
-        model: "gpt-4o-mini", // có thể đổi sang gpt-4o nếu muốn mạnh hơn
-        messages: [{ role: "user", content: message }],
-      }),
+      body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
-    res.json({ reply: data.choices[0].message.content });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ reply: "❌ Có lỗi xảy ra, thử lại nhé." });
+    const text = await r.text();
+    if (!r.ok) {
+      console.error("❌ OpenAI error:", r.status, text);
+      return res.status(502).json({ error: "OpenAI error", detail: text });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("❌ JSON parse error:", text);
+      return res.status(500).json({ error: "Invalid JSON", detail: text });
+    }
+
+    const reply = data.choices?.[0]?.message?.content?.trim() || "Không có phản hồi.";
+    console.log("✅ Reply:", reply);
+    return res.json({ reply });
+  } catch (err) {
+    console.error("❌ Exception:", err);
+    return res.status(500).json({ error: "Server error", detail: String(err) });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Server chạy tại http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
