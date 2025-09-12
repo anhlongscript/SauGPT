@@ -1,41 +1,35 @@
-import OpenAI from "openai";
 import express from "express";
-import multer from "multer";
+import bodyParser from "body-parser";
 import cors from "cors";
+import OpenAI from "openai";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+app.use(bodyParser.json());
+app.use(express.static("public")); // phục vụ file frontend
 
-const upload = multer({ dest: "uploads/" });
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // nhớ set API key
+});
 
-app.post("/chat", upload.single("image"), async (req, res) => {
-  const userMessage = req.body.message;
-  let content = [];
-
-  if (userMessage) {
-    content.push({ type: "text", text: userMessage });
-  }
-  if (req.file) {
-    content.push({
-      type: "image_url",
-      image_url: { url: `http://localhost:3000/uploads/${req.file.filename}` }
-    });
-  }
-
+app.post("/api/chat", async (req, res) => {
   try {
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content }]
+    const { message } = req.body;
+
+    const response = await client.chat.completions.create({
+      model: "gpt-3.5-turbo", // hoặc gpt-4
+      messages: [{ role: "user", content: message }],
     });
 
-    res.json({ reply: completion.choices[0].message });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Lỗi AI" });
+    res.json({
+      reply: response.choices[0].message.content,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "❌ Lỗi: OpenAI error" });
   }
 });
 
-app.listen(3000, () => console.log("🚀 Server chạy tại http://localhost:3000"));
+app.listen(3000, () => {
+  console.log("✅ Server chạy tại http://localhost:3000");
+});
