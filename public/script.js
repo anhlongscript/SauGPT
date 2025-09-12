@@ -1,31 +1,39 @@
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-
 function appendMessage(sender, message) {
-  const msg = document.createElement("div");
-  msg.innerHTML = `<b>${sender}:</b> ${message}`;
-  chatBox.appendChild(msg);
+  const chatBox = document.getElementById("chat-box");
+  const msgDiv = document.createElement("div");
+
+  if (sender === "Sâu🐛GPT") {
+    // Xử lý code block dạng ```lang ... ```
+    let formatted = message.replace(/```(\w+)?([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre><code>${code.trim()}</code></pre>`;
+    });
+    msgDiv.innerHTML = `<b style="color:limegreen">${sender}:</b> ${formatted}`;
+  } else {
+    msgDiv.innerHTML = `<b style="color:dodgerblue">${sender}:</b> ${message}`;
+  }
+
+  chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-sendBtn.addEventListener("click", async () => {
-  const message = userInput.value.trim();
-  if (!message) return;
+function sendMessage() {
+  const input = document.getElementById("user-input");
+  const text = input.value.trim();
+  if (!text) return;
 
-  appendMessage("Bạn", message);
-  userInput.value = "";
+  appendMessage("Bạn", text);
+  input.value = "";
 
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    const data = await res.json();
-    appendMessage("Sâu🐛GPT", data.reply);
-  } catch (err) {
-    appendMessage("Sâu🐛GPT", "❌ Lỗi kết nối server.");
-  }
-});
+  // Fake trả lời từ SâuGPT
+  setTimeout(() => {
+    if (text.includes("code")) {
+      appendMessage("Sâu🐛GPT", `Chắc chắn rồi! Đây là code mẫu nè:
+\`\`\`lua
+local player = game.Players.LocalPlayer
+print("Xin chào từ Sâu🐛GPT!")
+\`\`\``);
+    } else {
+      appendMessage("Sâu🐛GPT", "Tôi đã nhận được tin nhắn của bạn 🐛✨");
+    }
+  }, 1000);
+}
