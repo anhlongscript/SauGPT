@@ -1,65 +1,39 @@
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import OpenAI from "openai";
+import fetch from "node-fetch";
 
-// Khắc phục __dirname trong ES Module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// App setup
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
+// 👉 Dán thẳng key vào đây
+const OPENAI_API_KEY = "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";
+
+app.use(express.static("public"));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
 
-// OpenAI client
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // phải khai báo trên Render Env
-});
-
-// API chat
 app.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body || {};
-    if (!message) {
-      return res.status(400).json({ reply: "⚠️ Thiếu message trong request" });
-    }
+    const { message } = req.body;
 
-    console.log("📩 Client gửi:", message);
-
-    const completion = await client.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: message }],
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini", // có thể đổi sang gpt-4o nếu muốn mạnh hơn
+        messages: [{ role: "user", content: message }],
+      }),
     });
 
-    const reply = completion?.choices?.[0]?.message?.content || "🤖 Không có trả lời";
-    console.log("🤖 Trả lời:", reply);
-
-    return res.json({ reply });
-  } catch (err) {
-    console.error("❌ ERROR /chat:", err);
-
-    // Nếu có response từ OpenAI thì log thêm chi tiết
-    if (err?.response) {
-      try {
-        const text = await err.response.text();
-        console.error("❌ OpenAI error body:", text);
-      } catch (e) {
-        console.error("Không đọc được body từ OpenAI", e);
-      }
-    }
-
-    return res.status(500).json({
-      reply: "❌ Có lỗi xảy ra, thử lại nhé.",
-      error: err.message || String(err),
-    });
+    const data = await response.json();
+    res.json({ reply: data.choices[0].message.content });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ reply: "❌ Có lỗi xảy ra, thử lại nhé." });
   }
 });
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 SâuGPT chạy tại http://localhost:${PORT}`);
+  console.log(`✅ Server chạy tại http://localhost:${PORT}`);
 });
