@@ -2,144 +2,119 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Sâu🐛GPT</title>
+  <title>Sâu🐛GPT Chat</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #0d0d0d;
-      color: white;
-    }
-    .sidebar {
-      width: 250px;
+      background: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       height: 100vh;
-      background: #111;
-      padding: 20px;
-      float: left;
+      margin: 0;
     }
-    .sidebar h2 {
-      margin: 0 0 20px;
-      color: #7c4dff;
-    }
-    .chat-container {
-      margin-left: 250px;
-      padding: 20px;
-    }
-    .chat-box {
-      height: 75vh;
-      overflow-y: auto;
-      border: 1px solid #333;
-      border-radius: 10px;
+    #chatBox {
+      width: 90%;
+      max-width: 600px;
+      height: 70vh;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       padding: 10px;
-      background: #1a1a1a;
+      overflow-y: auto;
+      background: #fff;
+      margin-top: 20px;
     }
     .message {
-      margin: 10px 0;
+      margin: 5px 0;
+      padding: 8px 10px;
+      border-radius: 6px;
     }
     .user {
-      color: #4da6ff;
+      background: #d1e7ff;
+      text-align: right;
     }
     .bot {
-      color: #7cfc00;
+      background: #e9ffe1;
+      text-align: left;
     }
-    .input-box {
-      display: flex;
+    #inputArea {
       margin-top: 10px;
+      width: 90%;
+      max-width: 600px;
+      display: flex;
     }
-    .input-box input[type="text"] {
+    #userInput {
       flex: 1;
       padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-right: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    .input-box button {
-      padding: 10px 15px;
+    #sendBtn {
+      margin-left: 10px;
+      padding: 10px 20px;
       border: none;
-      border-radius: 8px;
-      background: #7c4dff;
+      border-radius: 6px;
+      background: #007bff;
       color: white;
       cursor: pointer;
+    }
+    #sendBtn:hover {
+      background: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Sâu🐛GPT</h2>
-    <button onclick="newChat()">➕ Đoạn chat mới</button>
-    <p style="margin-top:20px; color:gray;">⚙️ Cài đặt</p>
-    <p style="color:gray;">❓ Trợ giúp</p>
-  </div>
-
-  <div class="chat-container">
-    <h1>Tôi có thể giúp gì cho bạn?</h1>
-    <p>Tôi là trợ lý AI thông minh <b>Sâu🐛GPT</b>, sẵn sàng hỗ trợ bạn với mọi câu hỏi và nhiệm vụ.</p>
-    
-    <div class="chat-box" id="chat"></div>
-    
-    <div class="input-box">
-      <input type="file" id="imageInput" accept="image/*" style="display:none" />
-      <button onclick="document.getElementById('imageInput').click()">📎</button>
-      <input type="text" id="messageInput" placeholder="Hỏi bất kỳ điều gì..." />
-      <button onclick="sendMessage()">Gửi</button>
-    </div>
+  <h2>💬 Chat với Sâu🐛GPT</h2>
+  <div id="chatBox"></div>
+  <div id="inputArea">
+    <input id="userInput" type="text" placeholder="Nhập tin nhắn..." />
+    <button id="sendBtn">Gửi</button>
   </div>
 
   <script>
+    const chatBox = document.getElementById("chatBox");
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function addMessage(sender, text, isUser = false) {
+      const msg = document.createElement("div");
+      msg.classList.add("message");
+      msg.classList.add(isUser ? "user" : "bot");
+      msg.innerHTML = `<b>${sender}:</b> ${text}`;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
     async function sendMessage() {
-      const chat = document.getElementById("chat");
-      const msgInput = document.getElementById("messageInput");
-      const imageInput = document.getElementById("imageInput");
+      const message = input.value.trim();
+      if (!message) return;
 
-      const userMsg = msgInput.value;
-      if (!userMsg && !imageInput.files.length) return;
+      addMessage("Bạn", message, true);
+      input.value = "";
 
-      // Hiển thị tin nhắn người dùng
-      const userDiv = document.createElement("div");
-      userDiv.className = "message user";
-      userDiv.innerHTML = `<b>Bạn:</b> ${userMsg}`;
-      chat.appendChild(userDiv);
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
 
-      // Nếu có ảnh thì hiện ảnh
-      if (imageInput.files.length) {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(imageInput.files[0]);
-        img.style.maxWidth = "200px";
-        img.style.display = "block";
-        chat.appendChild(img);
+        const data = await res.json();
+
+        if (data.reply) {
+          addMessage("Sâu🐛GPT", data.reply, false);
+        } else {
+          addMessage("Sâu🐛GPT", "❌ Lỗi: Không nhận được phản hồi.", false);
+        }
+      } catch (err) {
+        addMessage("Sâu🐛GPT", "❌ Lỗi: Server không phản hồi.", false);
       }
-
-      chat.scrollTop = chat.scrollHeight;
-
-      // Gửi về server
-      const formData = new FormData();
-      formData.append("message", userMsg);
-      if (imageInput.files.length) {
-        formData.append("image", imageInput.files[0]);
-      }
-
-      const res = await fetch("/chat", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-
-      // Hiển thị trả lời bot
-      const botDiv = document.createElement("div");
-      botDiv.className = "message bot";
-      botDiv.innerHTML = `<b>Sâu🐛GPT:</b> ${data.reply.content[0].text}`;
-      chat.appendChild(botDiv);
-
-      chat.scrollTop = chat.scrollHeight;
-
-      msgInput.value = "";
-      imageInput.value = "";
     }
 
-    function newChat() {
-      document.getElementById("chat").innerHTML = "";
-    }
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
   </script>
 </body>
 </html>
