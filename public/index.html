@@ -1,17 +1,30 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>SâuGPT</title>
-</head>
-<body>
-  <h1>Xin chào 👋 Đây là giao diện SâuGPT</h1>
-  <form id="chat-form">
-    <input type="text" id="user-input" placeholder="Nhập tin nhắn..." required>
-    <button type="submit">Gửi</button>
-  </form>
-  <div id="chat-box"></div>
+<form id="chatForm">
+  <input type="text" id="userInput" placeholder="Nhập tin nhắn..." />
+  <button type="submit">Gửi</button>
+</form>
 
-  <script src="script.js"></script>
-</body>
-</html>
+<div id="chatBox"></div>
+
+<script>
+  const chatForm = document.getElementById("chatForm");
+  const chatBox = document.getElementById("chatBox");
+
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
+
+    chatBox.innerHTML += `<p><b>Bạn:</b> ${message}</p>`;
+    input.value = "";
+
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+
+    const data = await res.json();
+    chatBox.innerHTML += `<p><b>SâuGPT:</b> ${data.reply}</p>`;
+  });
+</script>
