@@ -1,41 +1,29 @@
-const express = require("express");
-const OpenAI = require("openai");
+import express from "express";
+import bodyParser from "body-parser";
+import OpenAI from "openai";
+
 const app = express();
+const port = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 3000;
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// middleware để parse JSON
-app.use(express.json());
+app.use(express.static("public"));
+app.use(bodyParser.json());
 
-// tạo client OpenAI
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // lấy từ Render Environment Variable
-});
-
-// route mặc định
-app.get("/", (req, res) => {
-  res.send("Xin chào từ sâu gpt 🚀");
-});
-
-// route chat
-app.post("/chat", async (req, res) => {
+app.post("/api/chat", async (req, res) => {
   try {
-    const { message } = req.body;
-
+    const userMessage = req.body.message;
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: message }],
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: userMessage }]
     });
 
-    res.json({
-      reply: response.choices[0].message.content,
-    });
+    res.json({ reply: response.choices[0].message.content });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Lỗi khi gọi OpenAI API" });
+    res.status(500).json({ reply: "Lỗi AI 😢" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server đang chạy ở cổng ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server chạy tại http://localhost:${port}`);
 });
