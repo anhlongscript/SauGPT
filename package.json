@@ -2,7 +2,7 @@
   "name": "SauGPT",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",   // <--- thêm dòng này
+  "type": "module", 
   "scripts": {
     "start": "node index.js"
   },
