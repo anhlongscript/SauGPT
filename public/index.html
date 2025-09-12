@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Sâu🐛GPT</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sâu🐛GPT Chat</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <h2>Tôi là trợ lý AI thông minh <b>Sâu🐛GPT</b></h2>
+  <div id="chat-container">
     <div id="chat-box"></div>
     <div id="input-area">
-      <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
-      <button id="send-btn">Gửi</button>
+      <input id="user-input" type="text" placeholder="Nhập tin nhắn..." />
+      <button onclick="sendMessage()">Gửi</button>
     </div>
   </div>
   <script src="script.js"></script>
