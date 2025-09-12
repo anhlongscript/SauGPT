@@ -2,18 +2,144 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>SâuGPT</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Sâu🐛GPT</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d0d0d;
+      color: white;
+    }
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background: #111;
+      padding: 20px;
+      float: left;
+    }
+    .sidebar h2 {
+      margin: 0 0 20px;
+      color: #7c4dff;
+    }
+    .chat-container {
+      margin-left: 250px;
+      padding: 20px;
+    }
+    .chat-box {
+      height: 75vh;
+      overflow-y: auto;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 10px;
+      background: #1a1a1a;
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .user {
+      color: #4da6ff;
+    }
+    .bot {
+      color: #7cfc00;
+    }
+    .input-box {
+      display: flex;
+      margin-top: 10px;
+    }
+    .input-box input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-right: 10px;
+    }
+    .input-box button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #7c4dff;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>🤖 Xin chào, đây là SâuGPT</h1>
-  <div id="chatBox">
-    <div id="messages"></div>
-    <form id="chatForm">
-      <input type="text" id="userInput" placeholder="Nhập tin nhắn..." required>
-      <button type="submit">Gửi</button>
-    </form>
+  <div class="sidebar">
+    <h2>Sâu🐛GPT</h2>
+    <button onclick="newChat()">➕ Đoạn chat mới</button>
+    <p style="margin-top:20px; color:gray;">⚙️ Cài đặt</p>
+    <p style="color:gray;">❓ Trợ giúp</p>
   </div>
-  <script src="script.js" defer></script>
+
+  <div class="chat-container">
+    <h1>Tôi có thể giúp gì cho bạn?</h1>
+    <p>Tôi là trợ lý AI thông minh <b>Sâu🐛GPT</b>, sẵn sàng hỗ trợ bạn với mọi câu hỏi và nhiệm vụ.</p>
+    
+    <div class="chat-box" id="chat"></div>
+    
+    <div class="input-box">
+      <input type="file" id="imageInput" accept="image/*" style="display:none" />
+      <button onclick="document.getElementById('imageInput').click()">📎</button>
+      <input type="text" id="messageInput" placeholder="Hỏi bất kỳ điều gì..." />
+      <button onclick="sendMessage()">Gửi</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const chat = document.getElementById("chat");
+      const msgInput = document.getElementById("messageInput");
+      const imageInput = document.getElementById("imageInput");
+
+      const userMsg = msgInput.value;
+      if (!userMsg && !imageInput.files.length) return;
+
+      // Hiển thị tin nhắn người dùng
+      const userDiv = document.createElement("div");
+      userDiv.className = "message user";
+      userDiv.innerHTML = `<b>Bạn:</b> ${userMsg}`;
+      chat.appendChild(userDiv);
+
+      // Nếu có ảnh thì hiện ảnh
+      if (imageInput.files.length) {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(imageInput.files[0]);
+        img.style.maxWidth = "200px";
+        img.style.display = "block";
+        chat.appendChild(img);
+      }
+
+      chat.scrollTop = chat.scrollHeight;
+
+      // Gửi về server
+      const formData = new FormData();
+      formData.append("message", userMsg);
+      if (imageInput.files.length) {
+        formData.append("image", imageInput.files[0]);
+      }
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      // Hiển thị trả lời bot
+      const botDiv = document.createElement("div");
+      botDiv.className = "message bot";
+      botDiv.innerHTML = `<b>Sâu🐛GPT:</b> ${data.reply.content[0].text}`;
+      chat.appendChild(botDiv);
+
+      chat.scrollTop = chat.scrollHeight;
+
+      msgInput.value = "";
+      imageInput.value = "";
+    }
+
+    function newChat() {
+      document.getElementById("chat").innerHTML = "";
+    }
+  </script>
 </body>
 </html>
