@@ -1,81 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sâu🐛GPT</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sâu GPT</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="dark">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <button id="closeSidebar">✖</button>
+      <h2>Menu</h2>
+    </div>
+    <ul>
+      <li id="newChat">➕ Đoạn chat mới</li>
+      <li id="setNickname">✍️ Đặt biệt danh</li>
+    </ul>
+  </div>
+
+  <!-- Overlay khi mở sidebar -->
+  <div id="overlay"></div>
+
+  <!-- Thanh top -->
   <header>
-    <button id="hamburger" aria-label="menu">☰</button>
-    <div class="brand">
-      <span class="icon">🐛</span>
-      <span class="title">Sâu<span class="tiny">GPT</span></span>
-    </div>
-    <div class="top-actions">
-      <button id="btnNickname">Đặt biệt danh</button>
-    </div>
+    <button id="menuBtn">☰</button>
+    <h1 id="title">Sâu GPT</h1>
+    <button id="themeToggle" class="theme-btn">🌙</button>
   </header>
 
-  <div class="layout">
-    <aside id="sidebar" class="collapsed">
-      <div class="side-top">
-        <h2>🐛 SâuGPT</h2>
-        <button id="btnNewChat" class="primary">+ Đoạn chat mới</button>
-      </div>
-      <nav class="menu">
-        <a href="#" class="menu-item" id="m-nickname">Đặt biệt danh</a>
-        <a href="#" class="menu-item" id="m-export">Xuất chat</a>
-        <a href="#" class="menu-item" id="m-help">Trợ giúp</a>
-        <a href="#" class="menu-item" id="m-settings">Cài đặt</a>
-      </nav>
-    </aside>
+  <!-- Khung chat -->
+  <main id="chatContainer">
+    <div id="chat"></div>
+  </main>
 
-    <main>
-      <section class="hero">
-        <h1>Tôi có thể giúp gì cho bạn?</h1>
-        <p class="subtitle">Tôi là trợ lý AI thông minh <strong id="botNamePreview">SâuGPT</strong>, sẵn sàng hỗ trợ bạn.</p>
-      </section>
+  <!-- Ô nhập -->
+  <footer>
+    <input type="text" id="userInput" placeholder="Nhập tin nhắn..." />
+    <button id="sendBtn">➤</button>
+  </footer>
 
-      <section id="chatArea">
-        <div id="chat" class="chat"></div>
-      </section>
-
-      <section class="composer">
-        <div class="left-tools">
-          <label class="image-btn">
-            <input id="imageInput" type="file" accept="image/*" />
-            📷
-          </label>
-        </div>
-        <input id="userInput" placeholder="Hỏi bất kỳ điều gì..." autocomplete="off" />
-        <button id="sendBtn" class="send">▶</button>
-      </section>
-    </main>
-  </div>
-
-  <!-- Modal đặt biệt danh -->
-  <div id="nickModal" class="modal hidden">
-    <div class="modal-card">
-      <h3>Đặt biệt danh</h3>
-      <label> Tên SâuGPT (tên hiển thị bot):</label>
-      <input id="botName" placeholder="Ví dụ: Sâu🐛GPT" />
-      <label> Bạn muốn được gọi là:</label>
-      <input id="userAlias" placeholder="Tên bạn hiển thị" />
-      <div class="modal-actions">
-        <button id="saveNick" class="primary">Lưu</button>
-        <button id="cancelNick">Hủy</button>
-      </div>
+  <!-- Popup đặt biệt danh -->
+  <div id="nicknameModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Đặt biệt danh</h2>
+      <label>Chúng tôi nên gọi bạn là:</label>
+      <input type="text" id="userNickname" placeholder="Tên của bạn..." />
+      <label>Đặt tên cho Sâu GPT:</label>
+      <input type="text" id="botNickname" placeholder="Tên cho bot..." />
+      <button id="saveNickname">Lưu</button>
     </div>
   </div>
-
-  <template id="msgTemplate">
-    <div class="message">
-      <div class="meta"></div>
-      <div class="content"></div>
-    </div>
-  </template>
 
   <script src="script.js"></script>
 </body>
