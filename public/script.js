@@ -1,5 +1,5 @@
 const API_URL = "https://api.openai.com/v1/chat/completions";
-const API_KEY = ""; // Nếu chạy local thì dán key vào đây, còn Render thì để trống
+const API_KEY = ""; // Dán key nếu chạy local, còn Render thì để trống
 
 async function sendMessage() {
   const input = document.getElementById("user-input");
@@ -23,7 +23,7 @@ async function sendMessage() {
     });
 
     if (!response.ok) {
-      throw new Error("⚠️ Có lỗi xảy ra (API Key sai hoặc server lỗi).");
+      throw new Error("⚠️ API Key sai hoặc server lỗi.");
     }
 
     const data = await response.json();
@@ -38,31 +38,10 @@ function addMessage(text, sender) {
   const chat = document.getElementById("chat");
   const msg = document.createElement("div");
   msg.classList.add("message", sender);
-
-  // Nếu có code block
-  if (text.includes("```")) {
-    const codeContent = text.replace(/```[a-zA-Z]*\n?/, "").replace(/```$/, "");
-
-    msg.innerHTML = `
-      <pre><code>${codeContent}</code></pre>
-      <button class="copy-btn">📋 Sao chép</button>
-    `;
-
-    // Copy nút
-    msg.querySelector(".copy-btn").addEventListener("click", () => {
-      navigator.clipboard.writeText(codeContent);
-      alert("✅ Đã sao chép code!");
-    });
-  } else {
-    msg.innerText = text;
-  }
+  msg.innerText = text;
 
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
-}
-
-function newChat() {
-  document.getElementById("chat").innerHTML = "";
 }
 
 document.getElementById("send-btn").addEventListener("click", sendMessage);
