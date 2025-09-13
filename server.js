@@ -1,14 +1,24 @@
 import express from "express";
+import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 
 dotenv.config();
-const app = express();
-app.use(express.json());
 
-app.post("/api/chat", async (req, res) => {
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public")); // serve frontend
+
+// Route test
+app.get("/", (req, res) => {
+  res.sendFile(process.cwd() + "/public/index.html");
+});
+
+// API chat
+app.post("/chat", async (req, res) => {
   try {
-    const userMessage = req.body.message;
+    const { message } = req.body;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -18,17 +28,16 @@ app.post("/api/chat", async (req, res) => {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: userMessage }]
+        messages: [{ role: "user", content: message }]
       })
     });
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "⚠️ Lỗi AI không trả lời.";
-    res.json({ reply });
+    res.json({ reply: data.choices[0].message.content });
   } catch (err) {
-    res.status(500).json({ reply: "⚠️ Server lỗi." });
+    res.status(500).json({ error: err.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Server chạy tại cổng ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server chạy ở cổng ${PORT}`));
