@@ -2,33 +2,30 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Sâu🐛GPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SâuGPT 🐛</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="sidebar">
     <h2>🐛 SâuGPT</h2>
-    <button class="new-chat">+ Đoạn chat mới</button>
+    <button onclick="newChat()">+ Đoạn chat mới</button>
     <ul>
       <li>Đặt biệt danh</li>
       <li>Xuất chat</li>
       <li>Trợ giúp</li>
       <li>Cài đặt</li>
-      <li>Tải lại</li>
+      <li onclick="location.reload()">Tải lại</li>
     </ul>
   </div>
 
   <div class="chat-container">
-    <div class="chat-header">
-      <h1>Tôi có thể giúp gì cho bạn?</h1>
-      <p>Tôi là trợ lý AI thông minh 🐛 SâuGPT, sẵn sàng hỗ trợ bạn với mọi câu hỏi và nhiệm vụ.</p>
-    </div>
-
-    <div id="chat-box" class="chat-box"></div>
-
-    <div class="chat-input">
-      <input type="text" id="user-input" placeholder="Hỏi bất kỳ điều gì...">
-      <button id="send-btn">➤</button>
+    <h1>Tôi có thể giúp gì cho bạn?</h1>
+    <p class="intro">Tôi là trợ lý AI thông minh 🐛 SâuGPT, sẵn sàng hỗ trợ bạn với mọi câu hỏi và nhiệm vụ.</p>
+    <div id="chat"></div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Hỏi bất kỳ điều gì..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()">▶</button>
     </div>
   </div>
 
