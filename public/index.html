@@ -3,30 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SâuGPT 🐛</title>
+  <title>Sâu 🐛 GPT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="sidebar">
-    <h2>🐛 SâuGPT</h2>
-    <button onclick="newChat()">+ Đoạn chat mới</button>
-    <ul>
-      <li>Đặt biệt danh</li>
-      <li>Xuất chat</li>
-      <li>Trợ giúp</li>
-      <li>Cài đặt</li>
-      <li onclick="location.reload()">Tải lại</li>
-    </ul>
-  </div>
+  <div class="chat-container">
+    <h1>Sâu 🐛 GPT</h1>
+    <div id="chat" class="chat-box"></div>
 
-  <div class="main">
-    <h1>Tôi có thể giúp gì cho bạn?</h1>
-    <p>Tôi là trợ lý AI thông minh 🐛 SâuGPT, sẵn sàng hỗ trợ bạn với mọi câu hỏi và nhiệm vụ.</p>
-    <div id="chat"></div>
-
-    <div class="input-box">
-      <input type="text" id="user-input" placeholder="Hỏi bất kỳ điều gì..." onkeydown="if(event.key==='Enter')sendMessage()">
-      <button onclick="sendMessage()">▶</button>
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
+      <input type="file" id="image-input" accept="image/*" style="display: none;">
+      <button id="image-btn">🖼️</button>
+      <button id="send-btn">Gửi</button>
     </div>
   </div>
 
