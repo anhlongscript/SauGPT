@@ -1,33 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sâu🐛GPT</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <title>SâuGPT</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: #eee; text-align: center; }
+    #chat { max-width: 600px; margin: 20px auto; padding: 10px; background: #222; border-radius: 8px; }
+    .msg { margin: 8px 0; text-align: left; }
+    .user { color: #00ffcc; }
+    .bot { color: #ffcc00; }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="logo">🐛 <strong>Sâu🐛GPT</strong></div>
-      <button onclick="newChat()">+ Đoạn chat mới</button>
-    </aside>
-
-    <main class="main">
-      <header class="main-header">
-        <h1>Sâu🐛GPT</h1>
-        <p class="subtitle">Hỏi gì về code, script, app — Sâu🐛GPT trả lời.</p>
-      </header>
-
-      <section id="chat" class="chat"></section>
-
-      <div class="composer">
-        <input id="user-input" type="text" placeholder="Nhập tin nhắn..." />
-        <button id="send-btn">Gửi</button>
-      </div>
-    </main>
-  </div>
-
+  <h1>🤖 SâuGPT Chat</h1>
+  <div id="chat"></div>
+  <input id="input" type="text" placeholder="Nhập tin nhắn..." />
+  <button onclick="sendMsg()">Gửi</button>
   <script src="script.js"></script>
 </body>
 </html>
