@@ -1,45 +1,36 @@
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
+const chatEl = document.getElementById("chat");
+const inputEl = document.getElementById("input");
+let messages = [{ role: "system", content: "Bạn là SâuGPT, AI vui tính." }];
 
-async function sendMessage() {
-  const message = userInput.value.trim();
-  if (!message) return;
+function addMessage(role, content) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.textContent = (role === "user" ? "🧑: " : "🤖: ") + content;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
 
-  // hiện tin nhắn user
-  addMessage("Bạn", message, "user");
-  userInput.value = "";
+async function sendMsg() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  addMessage("user", text);
+  inputEl.value = "";
+
+  messages.push({ role: "user", content: text });
 
   try {
     const res = await fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ messages })
     });
+
     const data = await res.json();
-
-    if (data.reply) {
-      addMessage("GPT", data.reply, "bot", true);
-    } else {
-      addMessage("GPT", "❌ Lỗi server!", "bot");
-    }
+    const reply = data.choices?.[0]?.message?.content || "❌ Lỗi server!";
+    addMessage("bot", reply);
+    messages.push({ role: "assistant", content: reply });
   } catch (err) {
-    addMessage("GPT", "⚠️ Kết nối thất bại!", "bot");
+    console.error("Fetch error:", err);
+    addMessage("bot", "⚠️ Không kết nối được server.");
   }
-}
-
-function addMessage(sender, text, cls, allowCopy=false) {
-  const div = document.createElement("div");
-  div.className = `message ${cls}`;
-  div.innerHTML = `<b>${sender}:</b> ${text}`;
-  
-  if (allowCopy) {
-    const btn = document.createElement("span");
-    btn.className = "copy-btn";
-    btn.innerText = "[Copy]";
-    btn.onclick = () => navigator.clipboard.writeText(text);
-    div.appendChild(btn);
-  }
-
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
 }
