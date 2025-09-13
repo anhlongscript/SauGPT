@@ -1,77 +1,57 @@
+const API_KEY = "YOUR_API_KEY_HERE"; // 🔑 thay bằng API key OpenAI của bạn
+
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
-const imgUpload = document.getElementById("image-upload");
 
-// Các câu trả lời mẫu
-const botReplies = [
-  "Xin chào! Tôi là 🐛 SâuGPT.",
-  "Bạn cần gì vậy?",
-  "Hôm nay bạn thế nào?",
-  "Mình có thể giúp gì cho bạn?",
-  "Nghe hay đó, kể thêm đi!",
-  "Hehe, bạn vui tính ghê 😆"
-];
-
-// Thêm tin nhắn vào khung chat
-function addMessage(text, sender, isImage = false) {
+function addMessage(text, sender) {
   const msg = document.createElement("div");
   msg.classList.add("message", sender);
-
-  if (isImage) {
-    const img = document.createElement("img");
-    img.src = text;
-    img.style.maxWidth = "200px";
-    msg.appendChild(img);
-  } else {
-    msg.innerText = text;
-  }
-
+  msg.textContent = text;
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
+  return msg;
 }
 
-// Bot trả lời (rule-based + random)
-function getBotReply(userMsg) {
-  const msg = userMsg.toLowerCase();
+async function sendMessage() {
+  const message = userInput.value.trim();
+  if (!message) return;
 
-  if (msg.includes("chào")) return "Chào bạn 👋, mình là SâuGPT 🐛";
-  if (msg.includes("tên")) return "Mình tên là 🐛 SâuGPT cute phô mai que";
-  if (msg.includes("buồn")) return "Đừng buồn nữa, có mình ở đây mà 💚";
-
-  return botReplies[Math.floor(Math.random() * botReplies.length)];
-}
-
-function sendMessage() {
-  const msg = userInput.value.trim();
-  if (!msg) return;
-
-  addMessage(msg, "user");
+  addMessage(message, "user");
   userInput.value = "";
 
-  setTimeout(() => {
-    const reply = getBotReply(msg);
-    addMessage(reply, "bot");
-  }, 800);
+  // Hiển thị typing
+  const typing = addMessage("SâuGPT đang suy nghĩ...", "bot");
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: message }]
+      })
+    });
+
+    const data = await response.json();
+    typing.remove();
+
+    if (data.choices && data.choices.length > 0) {
+      const reply = data.choices[0].message.content;
+      addMessage(reply, "bot");
+    } else {
+      addMessage("Xin lỗi, mình không thể trả lời ngay bây giờ.", "bot");
+    }
+  } catch (error) {
+    typing.remove();
+    addMessage("Có lỗi xảy ra, kiểm tra API key hoặc mạng nhé!", "bot");
+  }
 }
 
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
-});
-
-// Gửi ảnh
-imgUpload.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    addMessage(reader.result, "user", true);
-
-    setTimeout(() => {
-      addMessage("Ảnh đẹp đó 📸!", "bot");
-    }, 800);
-  };
-  reader.readAsDataURL(file);
 });
