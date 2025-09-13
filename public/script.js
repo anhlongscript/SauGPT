@@ -1,6 +1,6 @@
 const API_URL = "https://api.openai.com/v1/chat/completions";
 // ⚠️ KEY không để trực tiếp ở đây nếu public, mà set trong Render Environment
-const API_KEY = ""; // Nếu chạy local test thì bỏ key vào đây
+const API_KEY = "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"; // Nếu chạy local test thì bỏ key vào đây
 
 function addMessage(text, sender) {
   const chat = document.getElementById("chat");
