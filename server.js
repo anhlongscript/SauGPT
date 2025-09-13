@@ -1,78 +1,78 @@
-import express from "express";
-import cors from "cors";
-import fetch from "node-fetch";
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+const chatEl = document.getElementById("chat");
+const inputEl = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 
-dotenv.config();
-const app = express();
-app.use(cors());
-app.use(express.json());
+function newChat() {
+  chatEl.innerHTML = "";
+}
 
-// serve frontend
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "public")));
+function appendMessage(text, who = "bot") {
+  const div = document.createElement("div");
+  div.className = `msg ${who}`;
+  // code block detection
+  if (text.includes("```")) {
+    // remove fence and render code + copy button
+    const code = text.replace(/```[a-zA-Z]*\n?|```/g, "");
+    const pre = document.createElement("pre");
+    const codeEl = document.createElement("code");
+    codeEl.textContent = code;
+    pre.appendChild(codeEl);
 
-// quick health
-app.get("/health", (req, res) => {
-  res.json({ ok: true, envKeySet: !!process.env.OPENAI_API_KEY });
-});
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "copy-btn";
+    copyBtn.textContent = "📋 Copy";
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(code).then(() => {
+        copyBtn.textContent = "✅ Copied";
+        setTimeout(()=> copyBtn.textContent = "📋 Copy",1500);
+      });
+    };
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+    div.appendChild(copyBtn);
+    div.appendChild(pre);
+  } else {
+    div.textContent = (who === "bot" ? "Sâu🐛GPT: " : "Bạn: ") + text;
+  }
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
 
-app.post("/chat", async (req, res) => {
+async function sendMessage() {
+  const message = inputEl.value.trim();
+  if (!message) return;
+  appendMessage(message, "user");
+  inputEl.value = "";
+  // show typing indicator
+  const typing = document.createElement("div");
+  typing.className = "msg bot";
+  typing.textContent = "Sâu🐛GPT đang suy nghĩ...";
+  chatEl.appendChild(typing);
+  chatEl.scrollTop = chatEl.scrollHeight;
+
   try {
-    const message = req.body?.message;
-    if (!message) return res.status(400).json({ error: "Missing message" });
-
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("NO OPENAI KEY IN ENV");
-      return res.status(500).json({ error: "Server missing OPENAI_API_KEY" });
-    }
-
-    const openaiResp = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch("/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "Bạn là Sâu🐛GPT, trả lời rõ ràng, thân thiện, bằng tiếng Việt." },
-          { role: "user", content: message },
-        ],
-        max_tokens: 1200,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
     });
 
-    const data = await openaiResp.json();
-    // Log response for debug (do not log full key)
-    if (!openaiResp.ok) {
-      console.error("OpenAI API returned non-OK:", openaiResp.status, data);
-      return res.status(openaiResp.status).json({ error: data.error?.message || "OpenAI error", raw: data });
-    }
+    const data = await res.json();
+    typing.remove();
 
-    // Support either format
-    const reply = data?.choices?.[0]?.message?.content ?? data?.reply ?? null;
-    if (!reply) {
-      console.error("No reply found in OpenAI response:", data);
-      return res.status(500).json({ error: "No reply from AI", raw: data });
+    if (res.ok) {
+      // response from server: { reply: "..." }
+      const reply = data.reply ?? (data.choices?.[0]?.message?.content) ?? JSON.stringify(data);
+      appendMessage(reply, "bot");
+    } else {
+      // server responded non-200, show detailed error if present
+      const errMsg = data?.error || data?.raw?.error?.message || JSON.stringify(data);
+      appendMessage(`⚠️ Lỗi server: ${errMsg}`, "bot");
     }
-
-    res.json({ reply });
   } catch (err) {
-    console.error("Server error /chat:", err);
-    res.status(500).json({ error: err.message || "Server error" });
+    typing.remove();
+    appendMessage(`⚠️ Kết nối thất bại: ${err.message}`, "bot");
   }
-});
+}
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server listening on port ${PORT}`);
-  console.log("OPENAI key present in env:", !!process.env.OPENAI_API_KEY);
-});
+sendBtn.addEventListener("click", sendMessage);
+inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
