@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>ChatGPT Web</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sâu🐛GPT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-container">
-    <h2>💬 Chat với GPT</h2>
-    <div id="chat-box"></div>
-    <div class="input-area">
-      <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
-      <button onclick="sendMessage()">Gửi</button>
-    </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">🐛 <strong>Sâu🐛GPT</strong></div>
+      <button onclick="newChat()">+ Đoạn chat mới</button>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <h1>Sâu🐛GPT</h1>
+        <p class="subtitle">Hỏi gì về code, script, app — Sâu🐛GPT trả lời.</p>
+      </header>
+
+      <section id="chat" class="chat"></section>
+
+      <div class="composer">
+        <input id="user-input" type="text" placeholder="Nhập tin nhắn..." />
+        <button id="send-btn">Gửi</button>
+      </div>
+    </main>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
