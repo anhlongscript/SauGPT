@@ -1,69 +1,20 @@
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: #111;
+  background-color: #111;
   color: white;
-  display: flex;
-  height: 100vh;
-}
-
-.sidebar {
-  width: 250px;
-  background: #0a0a0a;
-  padding: 20px;
-}
-
-.sidebar h2 {
-  color: #00e676;
-}
-
-.sidebar button {
-  background: #00e676;
-  border: none;
-  padding: 10px;
-  width: 100%;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 20px;
-  font-weight: bold;
-}
-
-.sidebar ul {
-  list-style: none;
+  margin: 0;
   padding: 0;
 }
 
-.sidebar li {
-  margin: 10px 0;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.sidebar li:hover {
-  color: #00e676;
-}
-
-.chat-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background: #181818;
-}
-
-.chat-container h1 {
-  color: #bb86fc;
-}
-
 #chat {
-  flex: 1;
+  max-height: 80vh;
   overflow-y: auto;
-  padding: 10px;
+  padding: 20px;
 }
 
 .message {
   margin: 10px 0;
-  padding: 10px;
+  padding: 10px 15px;
   border-radius: 10px;
   max-width: 70%;
   word-wrap: break-word;
@@ -71,22 +22,45 @@ body {
 
 .user {
   background: #2196f3;
-  margin-left: auto;
-  text-align: right;
+  align-self: flex-end;
+  color: white;
 }
 
 .bot {
-  background: #00e676;
-  margin-right: auto;
+  background: #2ecc71;
+  align-self: flex-start;
+  color: white;
 }
 
-.input-container {
+pre {
+  background: #1e1e1e;
+  color: #00ff99;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.copy-btn {
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: #00c853;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #009624;
+}
+
+#input-container {
   display: flex;
   padding: 10px;
   background: #000;
 }
 
-.input-container input {
+#user-input {
   flex: 1;
   padding: 10px;
   border-radius: 5px;
@@ -94,12 +68,16 @@ body {
   outline: none;
 }
 
-.input-container button {
-  background: #00e676;
-  border: none;
-  padding: 10px 20px;
+#send-btn {
   margin-left: 10px;
+  padding: 10px 15px;
+  background: #00c853;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
+  color: white;
+}
+
+#send-btn:hover {
+  background: #009624;
 }
