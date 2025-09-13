@@ -1,57 +1,50 @@
-const API_KEY = "YOUR_API_KEY_HERE"; // 🔑 thay bằng API key OpenAI của bạn
-
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
+const API_URL = "https://api.openai.com/v1/chat/completions";
+// ⚠️ KEY không để trực tiếp ở đây nếu public, mà set trong Render Environment
+const API_KEY = ""; // Nếu chạy local test thì bỏ key vào đây
 
 function addMessage(text, sender) {
+  const chat = document.getElementById("chat");
   const msg = document.createElement("div");
   msg.classList.add("message", sender);
-  msg.textContent = text;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-  return msg;
+  msg.innerText = text;
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function newChat() {
+  document.getElementById("chat").innerHTML = "";
 }
 
 async function sendMessage() {
-  const message = userInput.value.trim();
+  const input = document.getElementById("userInput");
+  const message = input.value.trim();
   if (!message) return;
 
   addMessage(message, "user");
-  userInput.value = "";
-
-  // Hiển thị typing
-  const typing = addMessage("SâuGPT đang suy nghĩ...", "bot");
+  input.value = "";
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_KEY}`
+        "Authorization": `Bearer ${API_KEY || (window.API_KEY || "")}`
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: message }]
       })
     });
 
-    const data = await response.json();
-    typing.remove();
-
-    if (data.choices && data.choices.length > 0) {
-      const reply = data.choices[0].message.content;
-      addMessage(reply, "bot");
-    } else {
-      addMessage("Xin lỗi, mình không thể trả lời ngay bây giờ.", "bot");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "Xin lỗi, không nhận được phản hồi.";
+    addMessage(reply, "bot");
   } catch (error) {
-    typing.remove();
-    addMessage("Có lỗi xảy ra, kiểm tra API key hoặc mạng nhé!", "bot");
+    console.error(error);
+    addMessage("⚠️ Có lỗi xảy ra (API Key sai hoặc server lỗi).", "bot");
   }
 }
-
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
