@@ -1,78 +1,37 @@
-const chatEl = document.getElementById("chat");
-const inputEl = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
+import express from "express";
+import fetch from "node-fetch";
 
-function newChat() {
-  chatEl.innerHTML = "";
-}
+const app = express();
+app.use(express.json());
+app.use(express.static("public")); // phục vụ file frontend
 
-function appendMessage(text, who = "bot") {
-  const div = document.createElement("div");
-  div.className = `msg ${who}`;
-  // code block detection
-  if (text.includes("```")) {
-    // remove fence and render code + copy button
-    const code = text.replace(/```[a-zA-Z]*\n?|```/g, "");
-    const pre = document.createElement("pre");
-    const codeEl = document.createElement("code");
-    codeEl.textContent = code;
-    pre.appendChild(codeEl);
-
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "copy-btn";
-    copyBtn.textContent = "📋 Copy";
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(code).then(() => {
-        copyBtn.textContent = "✅ Copied";
-        setTimeout(()=> copyBtn.textContent = "📋 Copy",1500);
-      });
-    };
-
-    div.appendChild(copyBtn);
-    div.appendChild(pre);
-  } else {
-    div.textContent = (who === "bot" ? "Sâu🐛GPT: " : "Bạn: ") + text;
-  }
-  chatEl.appendChild(div);
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-async function sendMessage() {
-  const message = inputEl.value.trim();
-  if (!message) return;
-  appendMessage(message, "user");
-  inputEl.value = "";
-  // show typing indicator
-  const typing = document.createElement("div");
-  typing.className = "msg bot";
-  typing.textContent = "Sâu🐛GPT đang suy nghĩ...";
-  chatEl.appendChild(typing);
-  chatEl.scrollTop = chatEl.scrollHeight;
-
+app.post("/chat", async (req, res) => {
   try {
-    const res = await fetch("/chat", {
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: req.body.messages
+      })
     });
 
-    const data = await res.json();
-    typing.remove();
-
-    if (res.ok) {
-      // response from server: { reply: "..." }
-      const reply = data.reply ?? (data.choices?.[0]?.message?.content) ?? JSON.stringify(data);
-      appendMessage(reply, "bot");
-    } else {
-      // server responded non-200, show detailed error if present
-      const errMsg = data?.error || data?.raw?.error?.message || JSON.stringify(data);
-      appendMessage(`⚠️ Lỗi server: ${errMsg}`, "bot");
+    if (!resp.ok) {
+      const err = await resp.json();
+      console.error("❌ OpenAI API error:", resp.status, err);
+      return res.status(resp.status).json(err);
     }
-  } catch (err) {
-    typing.remove();
-    appendMessage(`⚠️ Kết nối thất bại: ${err.message}`, "bot");
-  }
-}
 
-sendBtn.addEventListener("click", sendMessage);
-inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+    const data = await resp.json();
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Server crash:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`✅ Server chạy tại cổng ${PORT}`));
