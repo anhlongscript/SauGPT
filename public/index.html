@@ -3,46 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sâu🐛GPT</title>
+  <title>Sâu 🐛GPT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="logo">🐛 SâuGPT</div>
-      <button class="new-chat">+ Đoạn chat mới</button>
-      <ul class="menu">
-        <li>Đặt biệt danh</li>
-        <li>Xuất chat</li>
-        <li>Trợ giúp</li>
-        <li>Cài đặt</li>
-        <li>Tải lại</li>
-      </ul>
-    </div>
+  <div class="sidebar">
+    <h2>🐛 SâuGPT</h2>
+    <ul class="menu">
+      <li>Đặt biệt danh</li>
+      <li>Xuất chat</li>
+      <li>Cài đặt</li>
+      <li>Thông tin</li>
+    </ul>
+  </div>
 
-    <!-- Main chat -->
-    <div class="main">
-      <div class="welcome">
-        <h1>Tôi có thể giúp gì cho bạn?</h1>
-        <p>Tôi là trợ lý AI thông minh Sâu🐛GPT, sẵn sàng hỗ trợ bạn với mọi câu hỏi và nhiệm vụ. 
-        Hãy bắt đầu cuộc trò chuyện bằng cách nhập tin nhắn bên dưới!</p>
-      </div>
-
-      <!-- Chat box -->
-      <div id="chat-box" class="chat-box"></div>
-
-      <!-- Input -->
-      <div class="input-container">
-        <input type="text" id="user-input" placeholder="Hỏi bất kỳ điều gì...">
-
-        <!-- Upload ảnh -->
-        <label for="file-upload" class="upload-btn" title="Gửi hình ảnh">🖼</label>
-        <input type="file" id="file-upload" accept="image/*" hidden>
-
-        <!-- Nút gửi -->
-        <button onclick="sendMessage()">➤</button>
-      </div>
+  <div class="chat-container">
+    <div class="chat-box" id="chat-box"></div>
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
+      <button id="send-btn">Gửi</button>
+      <label for="image-upload" class="img-btn">🖼️</label>
+      <input type="file" id="image-upload" accept="image/*" hidden>
     </div>
   </div>
 
