@@ -1,3 +1,6 @@
+// ============ CONFIG ============
+const OPENAI_API_KEY = "YOUR_API_KEY_HERE"; // ⚠️ thay key thật vào
+
 // UI refs
 const hamburger = document.getElementById("hamburger");
 const sidebar = document.getElementById("sidebar");
@@ -104,7 +107,7 @@ function addTypingIndicator(){
   const div = document.createElement("div");
   div.className = "message bot typing";
   div.innerHTML = `<div class="meta">${localStorage.getItem("saugpt_botname") || "SâuGPT"}:</div>
-                   <div class="content"><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>`;
+                   <div class="content"><span class="typing-dots">...</span></div>`;
   chatEl.appendChild(div);
   chatEl.scrollTop = chatEl.scrollHeight;
   return div;
@@ -113,32 +116,39 @@ function removeTypingIndicator(el){
   if(el && el.parentNode) el.parentNode.removeChild(el);
 }
 
-// send message (fake API for demo)
+// gọi API OpenAI
+async function fetchOpenAI(messages){
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini", // bạn có thể đổi
+      messages: messages
+    })
+  });
+  const data = await res.json();
+  if(data.error){
+    return "⚠️ Lỗi: " + data.error.message;
+  }
+  return data.choices[0].message.content;
+}
+
+// send message
 async function sendMessage(text){
   messages.push({ role:"user", content: text });
   const typingEl = addTypingIndicator();
 
-  // fake response
-  setTimeout(()=>{
+  try {
+    const reply = await fetchOpenAI(messages);
     removeTypingIndicator(typingEl);
-    addBotText("🤖 Đây là phản hồi demo cho: " + text);
-    messages.push({ role:"assistant", content: "🤖 Đây là phản hồi demo cho: " + text });
-  }, 1200);
-}
-
-// typing effect (optional)
-async function renderWithTypingEffect(fullText){
-  let acc = "";
-  const partialWrap = document.createElement("div");
-  partialWrap.className = "message bot";
-  partialWrap.innerHTML = `<div class="meta">${localStorage.getItem("saugpt_botname") || "SâuGPT"}:</div><div class="content"></div>`;
-  chatEl.appendChild(partialWrap);
-  const contentDiv = partialWrap.querySelector(".content");
-  for (let i=0;i<fullText.length;i++){
-    acc += fullText[i];
-    contentDiv.textContent = acc;
-    chatEl.scrollTop = chatEl.scrollHeight;
-    await new Promise(r => setTimeout(r, 6 + Math.random()*6));
+    addBotText(reply);
+    messages.push({ role:"assistant", content: reply });
+  } catch(e){
+    removeTypingIndicator(typingEl);
+    addBotText("❌ Lỗi kết nối API: " + e.message);
   }
 }
 
