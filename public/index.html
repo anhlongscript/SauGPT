@@ -2,39 +2,33 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SâuGPT 🐛</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1 id="bot-name">SâuGPT 🐛</h1>
-      <p><b>Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</b></p>
-      <div class="controls">
-        <button id="edit-nick">✏️ Đặt biệt danh</button>
-        <button id="theme-toggle">🌙</button>
-      </div>
+      <h1>🐛 SâuGPT</h1>
+      <button id="menuBtn">☰</button>
     </header>
 
-    <div id="chat-container" class="chat"></div>
+    <aside id="sidebar" class="hidden">
+      <button id="newChatBtn">➕ Đoạn chat mới</button>
+      <button id="setNicknameBtn">🏷️ Đặt biệt danh</button>
+      <button id="toggleTheme">🌙</button>
+    </aside>
 
-    <div class="input-box">
-      <input type="text" id="user-input" placeholder="Nhập tin nhắn..." />
-      <button id="send-btn">Gửi</button>
-    </div>
-  </div>
+    <main id="chat">
+      <div class="message bot"><b>Đàn em:</b> Xin chào 👋! Mình là <b>SâuGPT</b> – tốt nghiệp chuyên ngành code (đặc biệt là <b>LUA Roblox</b>)!!! Hôm nay anh cần gì nè? 😎</div>
+    </main>
 
-  <!-- Modal đặt biệt danh -->
-  <div id="nick-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>Đặt biệt danh</h2>
-      <label>Tên bot:</label>
-      <input id="bot-name-input" type="text" />
-      <label>Biệt danh của bạn:</label>
-      <input id="user-alias-input" type="text" />
-      <button id="save-nick">Lưu</button>
-    </div>
+    <div id="typing" class="hidden">SâuGPT đang gõ<span id="dots"></span></div>
+
+    <form id="chatForm">
+      <input type="text" id="userInput" placeholder="Nhập tin nhắn..."/>
+      <button type="submit">Gửi</button>
+    </form>
   </div>
 
   <script src="script.js"></script>
