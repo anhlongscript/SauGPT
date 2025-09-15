@@ -1,101 +1,73 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  transition: 0.3s;
 }
-
-:root {
-  --bg: #ffffff;
-  --text: #000000;
-  --chat-bg: #f2f2f2;
-}
-
-.dark {
-  --bg: #1e1e1e;
-  --text: #ffffff;
-  --chat-bg: #2c2c2c;
-}
-
 .app {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
-
 header {
+  background: #4a148c;
+  color: white;
   padding: 10px;
-  background: var(--chat-bg);
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 5px;
 }
-
-.controls {
-  display: flex;
-  gap: 10px;
+#sidebar {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  background: #eee;
+  width: 200px;
+  padding: 10px;
 }
-
-.chat {
+.hidden {
+  display: none;
+}
+main {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
-  background: var(--bg);
 }
-
 .message {
-  padding: 8px 12px;
-  margin: 6px 0;
-  border-radius: 10px;
-  max-width: 70%;
-}
-
-.user {
-  background: #0078ff;
-  color: white;
-  align-self: flex-end;
-}
-
-.assistant {
-  background: var(--chat-bg);
-  align-self: flex-start;
-}
-
-.input-box {
-  display: flex;
+  margin: 8px 0;
   padding: 10px;
-  background: var(--chat-bg);
+  border-radius: 5px;
 }
-
-.input-box input {
-  flex: 1;
-  padding: 8px;
+.message.user {
+  background: #d1c4e9;
+  text-align: right;
 }
-
-.input-box button {
-  padding: 8px 15px;
-  margin-left: 5px;
-  cursor: pointer;
+.message.bot {
+  background: #ede7f6;
 }
-
-.modal {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+form {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0,0,0,0.5);
+  border-top: 1px solid #ccc;
 }
-
-.modal.hidden {
-  display: none;
+form input {
+  flex: 1;
+  padding: 10px;
+  border: none;
 }
-
-.modal-content {
-  background: var(--bg);
-  color: var(--text);
-  padding: 20px;
-  border-radius: 8px;
+form button {
+  padding: 10px;
+  border: none;
+  background: #4a148c;
+  color: white;
+}
+.dark {
+  background: #121212;
+  color: #eee;
+}
+.dark header {
+  background: #222;
+}
+.dark .message.user {
+  background: #333;
+}
+.dark .message.bot {
+  background: #444;
 }
