@@ -1,22 +1,41 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>🐛 SâuGPT</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SâuGPT 🐛</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>🐛 SâuGPT</h1>
-    <p><b>Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</b></p>
-  </header>
+  <div class="app">
+    <header>
+      <h1 id="bot-name">SâuGPT 🐛</h1>
+      <p><b>Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</b></p>
+      <div class="controls">
+        <button id="edit-nick">✏️ Đặt biệt danh</button>
+        <button id="theme-toggle">🌙</button>
+      </div>
+    </header>
 
-  <main id="chat-box"></main>
+    <div id="chat-container" class="chat"></div>
 
-  <footer>
-    <input id="user-input" type="text" placeholder="Nhập tin nhắn..." />
-    <button onclick="sendMessage()">➡️</button>
-  </footer>
+    <div class="input-box">
+      <input type="text" id="user-input" placeholder="Nhập tin nhắn..." />
+      <button id="send-btn">Gửi</button>
+    </div>
+  </div>
+
+  <!-- Modal đặt biệt danh -->
+  <div id="nick-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Đặt biệt danh</h2>
+      <label>Tên bot:</label>
+      <input id="bot-name-input" type="text" />
+      <label>Biệt danh của bạn:</label>
+      <input id="user-alias-input" type="text" />
+      <button id="save-nick">Lưu</button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
