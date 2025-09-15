@@ -2,34 +2,49 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐛 SâuGPT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Thanh top -->
   <header>
-    <div class="menu-toggle">☰</div>
-    <div id="bot-info">
-      <div id="bot-name">🐛 SâuGPT</div>
-      <div id="bot-subtitle"><b>Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</b></div>
-    </div>
-    <div class="theme-toggle" id="themeToggle">🌙</div>
+    <button id="menu-btn">☰</button>
+    <h1>🐛 SâuGPT</h1>
+    <p class="subtitle">Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</p>
+    <button id="theme-toggle">🌙</button>
   </header>
 
-  <aside class="sidebar" id="sidebar">
-    <button id="newChat">+ Đoạn chat mới</button>
-    <button id="setAlias">✏️ Đặt biệt danh</button>
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <h2>Menu</h2>
+    <button onclick="newChat()">+ Đoạn chat mới</button>
+    <button onclick="openNickname()">Đặt biệt danh</button>
+    <button onclick="exportChat()">Xuất chat</button>
+    <button onclick="alert('📖 Hãy hỏi bất kỳ về code, đặc biệt Lua Roblox!')">Trợ giúp</button>
+    <button onclick="alert('⚙️ Tính năng cài đặt đang phát triển!')">Cài đặt</button>
   </aside>
 
+  <!-- Chat -->
   <main>
     <div id="chat"></div>
-    <div id="input-area">
-      <input type="text" id="user-input" placeholder="Nhập tin nhắn...">
-      <label for="image-upload" class="image-btn">🖼️</label>
-      <input type="file" id="image-upload" accept="image/*" hidden>
-      <button id="send-btn">➤</button>
+    <div class="input-box">
+      <input id="user-input" type="text" placeholder="Nhập tin nhắn...">
+      <button id="send-btn">Gửi</button>
     </div>
   </main>
+
+  <!-- Modal đặt biệt danh -->
+  <div id="nickname-modal" class="modal">
+    <div class="modal-content">
+      <h3>Đặt biệt danh</h3>
+      <input id="bot-name" placeholder="Tên SâuGPT (ví dụ: Sâu🐛GPT)">
+      <input id="user-name" placeholder="Bạn muốn được gọi là gì?">
+      <div class="modal-actions">
+        <button onclick="saveNickname()">Lưu</button>
+        <button onclick="closeNickname()">Hủy</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
