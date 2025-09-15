@@ -6,40 +6,17 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Sidebar -->
-  <div id="sidebar" class="sidebar">
-    <h2>🐛 SâuGPT</h2>
+  <header>
+    <h1>🐛 SâuGPT</h1>
     <p><b>Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</b></p>
-    <button onclick="openNicknameModal()">Đặt biệt danh</button>
-  </div>
+  </header>
 
-  <!-- Chat wrapper -->
-  <div class="chat-wrapper">
-    <div id="chat" class="chat"></div>
-    <div class="input-bar">
-      <textarea id="user-input" placeholder="Nhập tin nhắn..."></textarea>
-      <button id="send-btn">Gửi</button>
-    </div>
-  </div>
+  <main id="chat-box"></main>
 
-  <!-- Menu + theme -->
-  <button id="menu-btn" class="menu-btn">☰</button>
-  <button id="theme-toggle" class="theme-btn">🌙</button>
-
-  <!-- Modal đặt biệt danh -->
-  <div id="nickname-modal" class="modal">
-    <div class="modal-content">
-      <h2>Đặt biệt danh</h2>
-      <label>Tên bot:</label>
-      <input type="text" id="bot-name" placeholder="🐛 SâuGPT">
-      <label>Tên bạn:</label>
-      <input type="text" id="user-name" placeholder="Ví dụ: Đại ca">
-      <div class="modal-actions">
-        <button onclick="saveNicknameFromModal()">Lưu</button>
-        <button onclick="closeNickname()">Hủy</button>
-      </div>
-    </div>
-  </div>
+  <footer>
+    <input id="user-input" type="text" placeholder="Nhập tin nhắn..." />
+    <button onclick="sendMessage()">➡️</button>
+  </footer>
 
   <script src="script.js"></script>
 </body>
