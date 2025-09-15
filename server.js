@@ -1,54 +1,39 @@
 import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
 import fetch from "node-fetch";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static("public")); // nơi chứa index.html, script.js, style.css
-
-// ✅ API CHAT
-app.post("/chat", async (req, res) => {
+app.post("/api/chat", async (req, res) => {
   try {
     const { messages } = req.body;
 
-    // Gọi OpenAI API
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` // 🔥 KEY từ Render Env
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "Bạn là 🐛 SâuGPT — một chuyên gia lập trình, đặc biệt giỏi về code Lua cho Roblox. Luôn trả lời chi tiết, dễ hiểu, kèm code khi cần."
-          },
-          ...messages
-        ]
+        model: "gpt-3.5-turbo",
+        messages
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(500).json({ error: errorData });
-    }
-
     const data = await response.json();
-    const reply = data.choices[0].message.content;
+    res.json(data);
 
-    res.json({ reply });
   } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ error: "Lỗi server!" });
+    console.error(err);
+    res.status(500).json({ error: "❌ Lỗi server!" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server chạy ở cổng ${PORT}`));
