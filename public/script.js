@@ -1,6 +1,3 @@
-// ============ CONFIG ============
-const OPENAI_API_KEY = "YOUR_API_KEY_HERE"; // ⚠️ thay key thật vào
-
 // UI refs
 const hamburger = document.getElementById("hamburger");
 const sidebar = document.getElementById("sidebar");
@@ -16,14 +13,14 @@ const chatEl = document.getElementById("chat");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 const imageInput = document.getElementById("imageInput");
-const toggleTheme = document.getElementById("toggleTheme");
 
-let messages = [
-  { role: "system", content: "Bạn là SâuGPT, trợ lý thân thiện, trả lời rõ ràng, có thể viết code và tách block code với nút sao chép." }
-];
+let messages = [{
+  role: "system",
+  content: "Bạn là SâuGPT, trợ lý thân thiện, trả lời rõ ràng, có thể viết code và chia thành block, và tách code trong thành khối có nút sao chép."
+}];
 
-// load names
-function loadNames(){
+// Load nicknames từ localStorage
+function loadNames() {
   const bot = localStorage.getItem("saugpt_botname") || "SâuGPT";
   const alias = localStorage.getItem("saugpt_useralias") || "Bạn";
   botNamePreview.textContent = bot;
@@ -32,43 +29,48 @@ function loadNames(){
 }
 loadNames();
 
-// sidebar toggle
-hamburger.addEventListener("click", ()=> sidebar.classList.toggle("collapsed"));
-btnNickname.addEventListener("click", ()=> nickModal.classList.remove("hidden"));
+// Sidebar toggle
+hamburger.addEventListener("click", () => sidebar.classList.toggle("collapsed"));
+btnNickname.addEventListener("click", () => nickModal.classList.remove("hidden"));
 
-// modal actions
-saveNick.addEventListener("click", ()=>{
+// Modal actions
+saveNick.addEventListener("click", () => {
   localStorage.setItem("saugpt_botname", botNameInput.value || "SâuGPT");
   localStorage.setItem("saugpt_useralias", userAliasInput.value || "Bạn");
   loadNames();
   nickModal.classList.add("hidden");
 });
-cancelNick.addEventListener("click", ()=> nickModal.classList.add("hidden"));
+cancelNick.addEventListener("click", () => nickModal.classList.add("hidden"));
 
-// new chat
-btnNewChat.addEventListener("click", ()=>{
-  messages = [{ role: "system", content: "Bạn là SâuGPT, trợ lý thân thiện." }];
+// New chat
+btnNewChat.addEventListener("click", () => {
+  messages = [{
+    role: "system",
+    content: "Bạn là SâuGPT, trợ lý thân thiện, trả lời rõ ràng, có thể viết code và chia thành block."
+  }];
   chatEl.innerHTML = "";
   addBotText("Xin chào! Mời bạn nhập câu hỏi.");
 });
 
-// append message
-function appendMessage(who, text){
+// Append message (supports code blocks & copy)
+function appendMessage(who, text) {
   const wrapper = document.createElement("div");
   wrapper.className = "message " + (who === "user" ? "user" : "bot");
 
   const meta = document.createElement("div");
   meta.className = "meta";
   const alias = localStorage.getItem("saugpt_useralias") || "Bạn";
-  meta.innerText = who === "user" ? alias + ":" : (localStorage.getItem("saugpt_botname") || "SâuGPT") + ":";
+  meta.innerText = who === "user"
+    ? alias + ":"
+    : (localStorage.getItem("saugpt_botname") || "SâuGPT") + ":";
 
   const content = document.createElement("div");
   content.className = "content";
 
-  // parse code blocks ```...```
-  const parts = text.split(/```([\s\S]*?)```/);
-  for (let i = 0; i < parts.length; i++){
-    if (i % 2 === 0){
+  // Parse code blocks
+  const parts = text.split(/```/);
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
       const p = document.createElement("div");
       p.innerText = parts[i];
       content.appendChild(p);
@@ -82,11 +84,12 @@ function appendMessage(who, text){
       const copyBtn = document.createElement("button");
       copyBtn.className = "copy-btn";
       copyBtn.textContent = "Sao chép";
-      copyBtn.addEventListener("click", async ()=>{
+      copyBtn.addEventListener("click", async () => {
         await navigator.clipboard.writeText(code.textContent);
         copyBtn.textContent = "Đã sao chép!";
-        setTimeout(()=> copyBtn.textContent = "Sao chép", 1500);
+        setTimeout(() => copyBtn.textContent = "Sao chép", 1500);
       });
+
       pre.appendChild(copyBtn);
       content.appendChild(pre);
     }
@@ -98,92 +101,139 @@ function appendMessage(who, text){
   chatEl.scrollTop = chatEl.scrollHeight;
 }
 
-// add quick messages
-function addUserText(txt){ appendMessage("user", txt); }
-function addBotText(txt){ appendMessage("bot", txt); }
+// Helpers
+function addUserText(txt) { appendMessage("user", txt); }
+function addBotText(txt) { appendMessage("bot", txt); }
 
-// typing indicator
-function addTypingIndicator(){
+function addTypingIndicator() {
   const div = document.createElement("div");
   div.className = "message bot typing";
-  div.innerHTML = `<div class="meta">${localStorage.getItem("saugpt_botname") || "SâuGPT"}:</div>
-                   <div class="content"><span class="typing-dots">...</span></div>`;
+  div.innerHTML =
+    `<div class="meta">${localStorage.getItem("saugpt_botname") || "SâuGPT"}:</div>
+     <div class="content"><span class="typing-dots"><span></span><span></span><span></span></span></div>`;
   chatEl.appendChild(div);
   chatEl.scrollTop = chatEl.scrollHeight;
   return div;
 }
-function removeTypingIndicator(el){
-  if(el && el.parentNode) el.parentNode.removeChild(el);
+
+function removeTypingIndicator(el) {
+  if (el && el.parentNode) el.parentNode.removeChild(el);
 }
 
-// gọi API OpenAI
-async function fetchOpenAI(messages){
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini", // bạn có thể đổi
-      messages: messages
-    })
-  });
-  const data = await res.json();
-  if(data.error){
-    return "⚠️ Lỗi: " + data.error.message;
-  }
-  return data.choices[0].message.content;
-}
-
-// send message
-async function sendMessage(text){
-  messages.push({ role:"user", content: text });
+// Gửi message tới server
+async function sendMessage(text, base64Image) {
+  messages.push({ role: "user", content: text });
   const typingEl = addTypingIndicator();
 
   try {
-    const reply = await fetchOpenAI(messages);
+    const resp = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.text();
+      removeTypingIndicator(typingEl);
+      addBotText("⚠️ Có lỗi xảy ra (API Key sai hoặc server lỗi).");
+      console.error("Server non-OK:", resp.status, err);
+      return;
+    }
+
+    const data = await resp.json();
+    const reply =
+      (data.choices && data.choices[0] &&
+        (data.choices[0].message?.content || data.choices[0].text)) ||
+      data.output_text || "Không có phản hồi.";
+
     removeTypingIndicator(typingEl);
-    addBotText(reply);
-    messages.push({ role:"assistant", content: reply });
-  } catch(e){
+    await renderWithTypingEffect(reply);
+    messages.push({ role: "assistant", content: reply });
+
+  } catch (e) {
     removeTypingIndicator(typingEl);
-    addBotText("❌ Lỗi kết nối API: " + e.message);
+    addBotText("⚠️ Lỗi server. Vui lòng thử lại");
+    console.error(e);
+  }
+}
+
+// Render typing effect
+async function renderWithTypingEffect(fullText) {
+  const segments = fullText.split(/(```[\s\S]*?```)/g);
+  for (let seg of segments) {
+    if (!seg) continue;
+    if (seg.startsWith("```")) {
+      const codeContent = seg.replace(/```/g, "");
+      appendMessage("bot", "```" + codeContent + "```");
+    } else {
+      let acc = "";
+      const partialWrap = document.createElement("div");
+      partialWrap.className = "message bot";
+      partialWrap.innerHTML =
+        `<div class="meta">${localStorage.getItem("saugpt_botname") || "SâuGPT"}:</div>
+         <div class="content"></div>`;
+      chatEl.appendChild(partialWrap);
+      const contentDiv = partialWrap.querySelector(".content");
+
+      for (let i = 0; i < seg.length; i++) {
+        acc += seg[i];
+        contentDiv.textContent = acc;
+        chatEl.scrollTop = chatEl.scrollHeight;
+        await new Promise(r => setTimeout(r, 6 + Math.random() * 6));
+      }
+    }
   }
 }
 
 // UI events
-sendBtn.addEventListener("click", async ()=>{
+sendBtn.addEventListener("click", async () => {
   const txt = userInput.value.trim();
-  if(!txt) return;
+  const file = imageInput.files[0];
+  if (!txt && !file) return;
+
+  if (file) {
+    const base64 = await toBase64(file);
+    appendMessage("user", "[Hình ảnh gửi kèm]");
+    const img = document.createElement("img");
+    img.src = base64;
+    img.style.maxWidth = "240px";
+    img.style.display = "block";
+    img.style.marginTop = "8px";
+    chatEl.lastElementChild.querySelector(".content").appendChild(img);
+
+    const note = txt ? txt + " (kèm hình ảnh gửi ở trên)" : "(kèm hình ảnh)";
+    userInput.value = "";
+    imageInput.value = "";
+    addUserText(note);
+    await sendMessage(note, base64);
+    return;
+  }
+
   addUserText(txt);
   userInput.value = "";
-  await sendMessage(txt);
+  await sendMessage(txt, null);
 });
-userInput.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter" && !e.shiftKey){
+
+// Enter key support
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendBtn.click();
   }
 });
 
-// theme
-function loadTheme(){
-  const theme = localStorage.getItem("saugpt_theme") || "light";
-  document.body.setAttribute("data-theme", theme);
-  toggleTheme.textContent = theme === "light" ? "🌙" : "☀️";
+// Base64 helper
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
 }
-toggleTheme.addEventListener("click", ()=>{
-  const current = document.body.getAttribute("data-theme") || "light";
-  const next = current === "light" ? "dark" : "light";
-  document.body.setAttribute("data-theme", next);
-  localStorage.setItem("saugpt_theme", next);
-  toggleTheme.textContent = next === "light" ? "🌙" : "☀️";
-});
-loadTheme();
 
-// initial greeting
-(function init(){
+// Initial greeting
+(function init() {
   const bot = localStorage.getItem("saugpt_botname") || "SâuGPT";
   addBotText(`Xin chào! Tôi là ${bot} — hỏi gì mình giúp nhé.`);
 })();
