@@ -1,52 +1,101 @@
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: 0.3s;
+}
+
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --chat-bg: #f2f2f2;
+}
+
+.dark {
+  --bg: #1e1e1e;
+  --text: #ffffff;
+  --chat-bg: #2c2c2c;
+}
+
+.app {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
 header {
-  background: #4CAF50;
-  color: white;
   padding: 10px;
-  text-align: center;
+  background: var(--chat-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
-#chat-box {
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+.chat {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
-  background: #f5f5f5;
+  background: var(--bg);
+}
+
+.message {
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-radius: 10px;
+  max-width: 70%;
 }
 
 .user {
-  text-align: right;
-  margin: 5px;
-  color: blue;
+  background: #0078ff;
+  color: white;
+  align-self: flex-end;
 }
 
-.bot {
-  text-align: left;
-  margin: 5px;
-  color: green;
+.assistant {
+  background: var(--chat-bg);
+  align-self: flex-start;
 }
 
-footer {
+.input-box {
   display: flex;
   padding: 10px;
-  background: #ddd;
+  background: var(--chat-bg);
 }
 
-footer input {
+.input-box input {
   flex: 1;
-  padding: 10px;
+  padding: 8px;
 }
 
-footer button {
-  padding: 10px;
-  background: #4CAF50;
-  color: white;
-  border: none;
+.input-box button {
+  padding: 8px 15px;
+  margin-left: 5px;
   cursor: pointer;
+}
+
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  border-radius: 8px;
 }
