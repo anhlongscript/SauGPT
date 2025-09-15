@@ -1,54 +1,71 @@
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import fetch from "node-fetch";
+const chatEl = document.getElementById("chat");
+const inputEl = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+let chatHistory = [];
+let nickname = "bạn"; // mặc định
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static("public")); // nơi chứa index.html, script.js, style.css
+// Gửi tin nhắn
+async function sendMessage() {
+  const message = inputEl.value.trim();
+  if (!message) return;
 
-// ✅ API CHAT
-app.post("/chat", async (req, res) => {
+  addMessage("Bạn", message);
+  inputEl.value = "";
+
+  chatHistory.push({ role: "user", content: message });
+
   try {
-    const { messages } = req.body;
-
-    // Gọi OpenAI API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("/chat", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "Bạn là 🐛 SâuGPT — một chuyên gia lập trình, đặc biệt giỏi về code Lua cho Roblox. Luôn trả lời chi tiết, dễ hiểu, kèm code khi cần."
-          },
-          ...messages
-        ]
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: chatHistory })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(500).json({ error: errorData });
-    }
-
     const data = await response.json();
-    const reply = data.choices[0].message.content;
-
-    res.json({ reply });
+    if (data.reply) {
+      addMessage("🐛 SâuGPT", data.reply.replace(/```/g, "\n```")); // giữ format code
+      chatHistory.push({ role: "assistant", content: data.reply });
+    } else {
+      addMessage("🐛 SâuGPT", "❌ Lỗi server!");
+    }
   } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ error: "Lỗi server!" });
+    addMessage("🐛 SâuGPT", "❌ Không kết nối được đến server.");
   }
-});
+}
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+// Thêm tin nhắn vào khung chat
+function addMessage(sender, text) {
+  const msgEl = document.createElement("div");
+  msgEl.className = "message";
+  msgEl.innerHTML = `<strong>${sender}:</strong><br>${formatText(text)}`;
+  chatEl.appendChild(msgEl);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+// Format code block
+function formatText(text) {
+  return text.replace(/```([\s\S]*?)```/g, (match, code) => {
+    return `<pre><code>${escapeHtml(code)}</code> <button onclick="copyCode(this)">📋</button></pre>`;
+  });
+}
+
+// Escape HTML để không bị lỗi khi hiển thị code
+function escapeHtml(unsafe) {
+  return unsafe.replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;");
+}
+
+// Copy code
+function copyCode(btn) {
+  const code = btn.previousSibling.innerText;
+  navigator.clipboard.writeText(code);
+  btn.innerText = "✅";
+  setTimeout(() => (btn.innerText = "📋"), 2000);
+}
+
+sendBtn.addEventListener("click", sendMessage);
+inputEl.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
 });
