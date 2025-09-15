@@ -1,100 +1,54 @@
-const chatEl = document.getElementById("chat");
-const inputEl = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const sidebar = document.getElementById("sidebar");
-const menuToggle = document.querySelector(".menu-toggle");
-const themeToggle = document.getElementById("themeToggle");
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import fetch from "node-fetch";
 
-let messages = [{
-  role: "system",
-  content: "Bạn là 🐛 SâuGPT, một trợ lý AI chuyên viết code. Bạn tốt nghiệp chuyên ngành code (đặc biệt là Lua Roblox). Luôn đưa code vào block có nút sao chép và giải thích ngắn gọn."
-}];
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-let botName = localStorage.getItem("saugpt_botname") || "🐛 SâuGPT";
-let userAlias = localStorage.getItem("saugpt_useralias") || "bạn";
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static("public")); // nơi chứa index.html, script.js, style.css
 
-function addMessage(text, sender = "bot") {
-  const msg = document.createElement("div");
-  msg.className = "message " + sender;
-
-  if (text.includes("```")) {
-    let parts = text.split(/```/);
-    parts.forEach((part, i) => {
-      if (i % 2 === 0) {
-        if (part.trim()) msg.innerHTML += part.trim() + "<br>";
-      } else {
-        const codeBlock = document.createElement("div");
-        codeBlock.className = "code-block";
-        codeBlock.textContent = part.trim();
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "copy-btn";
-        copyBtn.textContent = "📋";
-        copyBtn.onclick = () => {
-          navigator.clipboard.writeText(codeBlock.textContent);
-          copyBtn.textContent = "✅";
-          setTimeout(() => copyBtn.textContent = "📋", 1500);
-        };
-        codeBlock.appendChild(copyBtn);
-        msg.appendChild(codeBlock);
-      }
-    });
-  } else {
-    msg.innerText = text;
-  }
-
-  chatEl.appendChild(msg);
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-async function sendMessage() {
-  const text = inputEl.value.trim();
-  if (!text) return;
-
-  addMessage(text, "user");
-  inputEl.value = "";
-
-  messages.push({ role: "user", content: text });
-
+// ✅ API CHAT
+app.post("/chat", async (req, res) => {
   try {
-    const res = await fetch("/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages })
-    });
-    const data = await res.json();
-    const reply = data.reply || "❌ Lỗi server!";
-    addMessage(reply, "bot");
-    messages.push({ role: "assistant", content: reply });
-  } catch {
-    addMessage("⚠️ API Key sai hoặc server lỗi.", "bot");
-  }
-}
+    const { messages } = req.body;
 
-sendBtn.onclick = sendMessage;
-inputEl.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
+    // Gọi OpenAI API
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Bạn là 🐛 SâuGPT — một chuyên gia lập trình, đặc biệt giỏi về code Lua cho Roblox. Luôn trả lời chi tiết, dễ hiểu, kèm code khi cần."
+          },
+          ...messages
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(500).json({ error: errorData });
+    }
+
+    const data = await response.json();
+    const reply = data.choices[0].message.content;
+
+    res.json({ reply });
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ error: "Lỗi server!" });
+  }
 });
 
-menuToggle.onclick = () => sidebar.classList.toggle("active");
-themeToggle.onclick = () => {
-  document.body.classList.toggle("dark");
-  themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
-};
-
-document.getElementById("newChat").onclick = () => {
-  chatEl.innerHTML = "";
-  messages = [messages[0]];
-  addMessage(`Xin chào! Tôi là ${botName}. Nay chúng ta sẽ làm script gì đây, ${userAlias}?`);
-};
-
-document.getElementById("setAlias").onclick = () => {
-  const bot = prompt("Đặt tên cho SâuGPT:", botName);
-  const alias = prompt("Chúng tôi nên gọi bạn như nào?", userAlias);
-  if (bot) { botName = bot; localStorage.setItem("saugpt_botname", bot); }
-  if (alias) { userAlias = alias; localStorage.setItem("saugpt_useralias", alias); }
-  addMessage(`Xin chào! Tôi là ${botName}. Nay chúng ta sẽ làm script gì đây, ${userAlias}?`);
-};
-
-(function init() {
-  addMessage(`Xin chào! Tôi là ${botName}. Nay chúng ta sẽ làm script gì đây, ${userAlias}?`);
-})();
+app.listen(PORT, () => {
+  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+});
