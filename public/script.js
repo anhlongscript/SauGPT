@@ -1,141 +1,72 @@
-let nickname = "";
-let currentChat = "";
-let chats = {};
-let isAdmin = false;
+let adminUnlocked = false;
+let consoleVisible = true;
 
-const messagesDiv = document.getElementById("messages");
-const userInput = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
-const chatList = document.getElementById("chatList");
-const chatTitle = document.getElementById("chatTitle");
-const consolePanel = document.getElementById("consolePanel");
-const consoleLogs = document.getElementById("consoleLogs");
+function appendMessage(sender, text, isCode = false) {
+  const messagesDiv = document.getElementById("messages");
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "message " + sender;
 
-// Dark/Light theme
-document.getElementById("themeToggle").addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  document.getElementById("themeToggle").textContent =
-    document.body.classList.contains("dark") ? "☀️" : "🌙";
-});
+  if (isCode) {
+    const codeDiv = document.createElement("div");
+    codeDiv.className = "code-block";
+    codeDiv.textContent = text;
 
-// Set nickname
-document.getElementById("setNickname").addEventListener("click", () => {
-  const name = prompt("Đặt tên cho SâuGPT:");
-  const you = prompt("Chúng tôi nên gọi bạn như nào?");
-  if (name && you) {
-    chatTitle.textContent = name;
-    nickname = you;
-    addBotMessage(`Xin chào ${nickname} 👋! Hôm nay mình sẽ giúp bạn viết code Roblox Lua nhé!`);
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "copy-btn";
+    copyBtn.innerText = "📋 Copy";
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text);
+      copyBtn.innerText = "✅ Copied!";
+      setTimeout(() => (copyBtn.innerText = "📋 Copy"), 2000);
+    };
+
+    codeDiv.appendChild(copyBtn);
+    msgDiv.appendChild(codeDiv);
+  } else {
+    msgDiv.textContent = text;
   }
-});
 
-// New chat
-document.getElementById("newChat").addEventListener("click", () => {
-  const title = prompt("Đặt tên cho đoạn chat:");
-  if (title) {
-    chats[title] = [];
-    currentChat = title;
-    renderChatList();
-    messagesDiv.innerHTML = "";
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  if (adminUnlocked && consoleVisible) {
+    logAdmin(`[${sender}] ${text}`);
   }
-});
+}
 
-// Check key
-document.getElementById("checkKey").addEventListener("click", () => {
+function sendMessage() {
+  const input = document.getElementById("userInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  appendMessage("user", msg);
+  input.value = "";
+
+  // fake bot reply demo
+  if (msg.toLowerCase().includes("code")) {
+    appendMessage("bot", "print('Hello Roblox!')", true);
+  } else {
+    appendMessage("bot", "SâuGPT 🐛 xin chào! Bạn cần gì?");
+  }
+}
+
+function checkKey() {
   const key = document.getElementById("adminKey").value;
-  if (key === "admin099") {
-    isAdmin = true;
-    consolePanel.classList.remove("hidden");
-    logToConsole("✅ Admin key accepted!");
+  if (key === "admin0999") {
+    adminUnlocked = true;
+    document.getElementById("consoleContainer").classList.remove("hidden");
+    appendMessage("bot", "🔓 Đã mở khóa console admin!");
   } else {
     alert("❌ Sai key!");
   }
-});
-
-// Send message
-sendBtn.addEventListener("click", () => sendMessage());
-userInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function sendMessage() {
-  const text = userInput.value.trim();
-  if (!text) return;
-  addUserMessage(text);
-  userInput.value = "";
-
-  // Fake bot reply (đại ca gắn API ở đây)
-  setTimeout(() => {
-    let reply = `Đàn em: Tôi đã nhận được lệnh "${text}" ${nickname ? nickname : ""}`;
-    if (text.toLowerCase().includes("code")) {
-      reply += `\n\n\`\`\`lua\nprint("Hello from Roblox Lua!")\n\`\`\``;
-    }
-    addBotMessage(reply);
-  }, 500);
 }
 
-function addUserMessage(text) {
-  const div = document.createElement("div");
-  div.className = "message user";
-  div.textContent = text;
-  messagesDiv.appendChild(div);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  saveMessage("user", text);
+function toggleConsole() {
+  consoleVisible = !consoleVisible;
+  document.getElementById("adminConsole").classList.toggle("hidden");
 }
 
-function addBotMessage(text) {
-  const div = document.createElement("div");
-  div.className = "message bot";
-
-  // Detect code block
-  if (text.includes("```")) {
-    const parts = text.split("```");
-    div.innerHTML = `<pre>${parts[1]}</pre>`;
-    const btn = document.createElement("button");
-    btn.textContent = "📋 Sao chép";
-    btn.className = "copy-btn";
-    btn.onclick = () => {
-      navigator.clipboard.writeText(parts[1]);
-      alert("Đã sao chép code!");
-    };
-    div.appendChild(btn);
-  } else {
-    div.textContent = text;
-  }
-
-  messagesDiv.appendChild(div);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  saveMessage("bot", text);
-}
-
-function saveMessage(role, content) {
-  if (!currentChat) return;
-  chats[currentChat].push({ role, content });
-}
-
-function renderChatList() {
-  chatList.innerHTML = "";
-  for (let title in chats) {
-    const li = document.createElement("li");
-    li.textContent = title;
-    li.onclick = () => {
-      currentChat = title;
-      loadChat(title);
-    };
-    chatList.appendChild(li);
-  }
-}
-
-function loadChat(title) {
-  messagesDiv.innerHTML = "";
-  chats[title].forEach(m => {
-    if (m.role === "user") addUserMessage(m.content);
-    else addBotMessage(m.content);
-  });
-}
-
-function logToConsole(msg) {
-  if (isAdmin) {
-    consoleLogs.textContent += msg + "\n";
-  }
+function logAdmin(msg) {
+  const consoleEl = document.getElementById("adminConsole");
+  consoleEl.textContent += msg + "\n";
 }
