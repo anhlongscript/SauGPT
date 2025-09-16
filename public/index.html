@@ -2,48 +2,32 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SâuGPT 🐛</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <!-- Sidebar -->
-    <aside id="sidebar">
-      <div class="menu-toggle">☰</div>
-      <h2>Đoạn chat</h2>
-      <button id="newChat">+ Đoạn chat mới</button>
-      <ul id="chatList"></ul>
-      <div class="nickname">
-        <button id="setNickname">Đặt biệt danh</button>
-      </div>
-      <div class="theme-toggle" id="themeToggle">🌙</div>
-      <div class="console-key">
-        <input type="password" id="adminKey" placeholder="Nhập key...">
-        <button id="checkKey">OK</button>
-      </div>
-    </aside>
+  <div class="app">
+    <h1>SâuGPT 🐛</h1>
 
-    <!-- Chat Area -->
-    <main id="chatArea">
-      <div id="chatHeader">
-        <h1 id="chatTitle">SâuGPT 🐛</h1>
-        <p class="subtitle"><b>Trợ lý chuyên ngành code (đặc biệt là LUA)!!!</b></p>
-      </div>
+    <div class="key-container">
+      <input type="password" id="adminKey" placeholder="Nhập key để mở console...">
+      <button onclick="checkKey()">Xác nhận</button>
+    </div>
+
+    <div id="consoleContainer" class="hidden">
+      <h3>🔐 Logs Admin</h3>
+      <button onclick="toggleConsole()">Ẩn/Hiện Console</button>
+      <pre id="adminConsole"></pre>
+    </div>
+
+    <div id="chatContainer">
       <div id="messages"></div>
-      <div id="inputArea">
-        <input type="text" id="userInput" placeholder="Nhập tin nhắn...">
-        <button id="sendBtn">Gửi</button>
+      <div class="input">
+        <input id="userInput" type="text" placeholder="Nhập tin nhắn...">
+        <button onclick="sendMessage()">Gửi</button>
       </div>
-    </main>
+    </div>
   </div>
-
-  <!-- Console logs -->
-  <div id="consolePanel" class="hidden">
-    <h2>🔑 Logs Console</h2>
-    <pre id="consoleLogs"></pre>
-  </div>
-
   <script src="script.js"></script>
 </body>
 </html>
