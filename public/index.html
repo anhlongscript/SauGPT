@@ -1,38 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>SâuGPT</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SâuGPT 🐛</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="icon">🐛</span>
+      <span class="title">Sâu<span>GPT</span></span>
+    </div>
+
+    <div class="right-controls">
+      <div id="admin-panel">
+        <input id="admin-key-input" type="password" placeholder="Nhập key admin..." />
+        <button id="admin-check-btn">Xác nhận</button>
+        <span id="admin-badge" class="hidden">🛡️ Admin Mode</span>
+      </div>
+    </div>
+  </div>
+
   <div class="layout">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <h3>📂 Đoạn chat</h3>
-      <ul id="chatList"></ul>
-      <button onclick="newChat()">➕ Tạo đoạn chat mới</button>
-    </div>
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <h3>📂 Các đoạn chat</h3>
+        <button id="new-chat-btn">➕ Đoạn chat mới</button>
+      </div>
+      <ul id="chatList" class="chat-list"></ul>
+    </aside>
 
-    <!-- Chatbox -->
-    <div class="chat-area">
-      <h2 id="botName">SâuGPT đẹp trai số 1 thế giới</h2>
-      <div id="messages" class="chat-box"></div>
+    <main class="main">
+      <header class="chat-header">
+        <div>
+          <h2 id="botName">SâuGPT</h2>
+          <div class="subtitle">Tốt nghiệp chuyên ngành code (đặc biệt là LUA)!!!</div>
+        </div>
+        <div class="chat-actions">
+          <button id="btn-rename-current">✏️ Đổi tên đoạn chat</button>
+          <button id="btn-clear-current">🧹 Xóa nội dung</button>
+        </div>
+      </header>
 
-      <div class="input-box">
-        <input type="text" id="userInput" placeholder="Hỏi bất kỳ điều gì..." onkeydown="if(event.key==='Enter') sendMsg()">
-        <button onclick="sendMsg()">Gửi</button>
-        <button onclick="toggleNickname()">⚙️ Đặt biệt danh</button>
+      <section id="messages" class="messages"></section>
+
+      <div class="composer">
+        <input id="userInput" type="text" placeholder="Hỏi bất kỳ điều gì..." />
+        <button id="sendBtn">Gửi</button>
       </div>
 
-      <div id="nicknameBox" class="nickname-box" style="display:none;">
-        <p>Đặt biệt danh</p>
-        <label>Tên SâuGPT: <input id="botNickname" value="SâuGPT đẹp trai số 1 thế giới"></label><br>
-        <label>Bạn muốn được gọi là: <input id="userNickname" value="Đại ca"></label><br>
-        <button onclick="saveNickname()">Lưu</button>
-        <button onclick="toggleNickname()">Hủy</button>
+      <div id="nicknameBox" class="nickname-box hidden">
+        <label> Tên SâuGPT: <input id="botNickname" /></label>
+        <label> Bạn muốn được gọi là: <input id="userNickname" /></label>
+        <div>
+          <button id="saveNicknameBtn">Lưu</button>
+          <button id="cancelNicknameBtn">Hủy</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Admin console - ẩn mặc định -->
+  <div id="adminConsole" class="admin-console hidden">
+    <div class="admin-header">
+      <div>🐞 Admin Console</div>
+      <div>
+        <button id="adminClearBtn">Xóa log</button>
+        <button id="adminCloseBtn">Tắt</button>
       </div>
     </div>
+    <pre id="adminLog" class="admin-log"></pre>
   </div>
 
   <script src="script.js"></script>
