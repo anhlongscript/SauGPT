@@ -2,33 +2,36 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>SâuGPT Chat</title>
+  <title>SâuGPT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="chatbox">
-    <h3>
-      Tôi là trợ lý AI thông minh 
-      <span id="botName">SâuGPT đẹp trai số 1 thế giới</span>, 
-      sẵn sàng hỗ trợ bạn.
-    </h3>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h3>📂 Đoạn chat</h3>
+      <ul id="chatList"></ul>
+      <button onclick="newChat()">➕ Tạo đoạn chat mới</button>
+    </div>
 
-    <div id="messages"></div>
+    <!-- Chatbox -->
+    <div class="chat-area">
+      <h2 id="botName">SâuGPT đẹp trai số 1 thế giới</h2>
+      <div id="messages" class="chat-box"></div>
 
-    <input id="userInput" type="text" placeholder="Hỏi bất kỳ điều gì...">
-    <button onclick="sendMsg()">Gửi</button>
-    <button onclick="toggleNickname()">Đặt biệt danh</button>
+      <div class="input-box">
+        <input type="text" id="userInput" placeholder="Hỏi bất kỳ điều gì..." onkeydown="if(event.key==='Enter') sendMsg()">
+        <button onclick="sendMsg()">Gửi</button>
+        <button onclick="toggleNickname()">⚙️ Đặt biệt danh</button>
+      </div>
 
-    <div id="nicknameBox">
-      <p>Đặt biệt danh</p>
-      <label>Tên SâuGPT: 
-        <input id="botNickname" value="SâuGPT đẹp trai số 1 thế giới">
-      </label><br>
-      <label>Bạn muốn được gọi là: 
-        <input id="userNickname" value="Đại ca">
-      </label><br>
-      <button onclick="saveNickname()">Lưu</button>
-      <button onclick="toggleNickname()">Hủy</button>
+      <div id="nicknameBox" class="nickname-box" style="display:none;">
+        <p>Đặt biệt danh</p>
+        <label>Tên SâuGPT: <input id="botNickname" value="SâuGPT đẹp trai số 1 thế giới"></label><br>
+        <label>Bạn muốn được gọi là: <input id="userNickname" value="Đại ca"></label><br>
+        <button onclick="saveNickname()">Lưu</button>
+        <button onclick="toggleNickname()">Hủy</button>
+      </div>
     </div>
   </div>
 
