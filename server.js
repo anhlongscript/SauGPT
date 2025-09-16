@@ -24,7 +24,7 @@ app.post("/api/chat", async (req, res) => {
 
   const systemPrompt = `Bạn là SâuGPT 🐛 — trợ lý chuyên về code (đặc biệt là Lua cho Roblox).
 Luôn trả lời thân thiện, có biểu tượng cảm xúc phù hợp, xưng hô theo biệt danh người dùng nếu họ đã đặt.
-Khi người dùng yêu cầu code, hãy xuất đoạn code trong khung ```lua ... ```.`;
+const note = "Khi người dùng yêu cầu code, hãy xuất đoạn code trong khung ```lua ... ```";
 
   // messages for OpenAI: system + history + latest user
   const payloadMessages = [
