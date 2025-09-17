@@ -1,72 +1,56 @@
-let adminUnlocked = false;
-let consoleVisible = true;
+let mode = null; // GenZ hoặc Coder
 
-function appendMessage(sender, text, isCode = false) {
-  const messagesDiv = document.getElementById("messages");
-  const msgDiv = document.createElement("div");
-  msgDiv.className = "message " + sender;
+document.getElementById("genzMode").addEventListener("click", () => {
+  mode = "genz";
+  startChat();
+});
 
-  if (isCode) {
-    const codeDiv = document.createElement("div");
-    codeDiv.className = "code-block";
-    codeDiv.textContent = text;
+document.getElementById("coderMode").addEventListener("click", () => {
+  mode = "coder";
+  startChat();
+});
 
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "copy-btn";
-    copyBtn.innerText = "📋 Copy";
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(text);
-      copyBtn.innerText = "✅ Copied!";
-      setTimeout(() => (copyBtn.innerText = "📋 Copy"), 2000);
-    };
-
-    codeDiv.appendChild(copyBtn);
-    msgDiv.appendChild(codeDiv);
-  } else {
-    msgDiv.textContent = text;
-  }
-
-  messagesDiv.appendChild(msgDiv);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-  if (adminUnlocked && consoleVisible) {
-    logAdmin(`[${sender}] ${text}`);
-  }
+function startChat() {
+  document.getElementById("mode-select").classList.add("hidden");
+  document.getElementById("chat-screen").classList.remove("hidden");
+  addMessage("bot", "🐛 Xin chào! Bạn đã chọn " + (mode === "genz" ? "🔥 GenZ Mode" : "👨‍💻 Coder Mode"));
 }
 
-function sendMessage() {
-  const input = document.getElementById("userInput");
-  const msg = input.value.trim();
-  if (!msg) return;
+function addMessage(sender, text) {
+  const chat = document.getElementById("chat");
+  const msg = document.createElement("div");
+  msg.classList.add("message", sender);
+  msg.textContent = (sender === "user" ? "Bạn: " : "SâuGPT: ") + text;
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+}
 
-  appendMessage("user", msg);
+document.getElementById("send").addEventListener("click", async () => {
+  const input = document.getElementById("user-input");
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage("user", message);
   input.value = "";
 
-  // fake bot reply demo
-  if (msg.toLowerCase().includes("code")) {
-    appendMessage("bot", "print('Hello Roblox!')", true);
+  // API gọi theo mode
+  let systemPrompt = "";
+  if (mode === "genz") {
+    systemPrompt = "Bạn là SâuGPT 🐛 ở chế độ GenZ. Trả lời kiểu vui tính, cà khịa, dùng icon.";
   } else {
-    appendMessage("bot", "SâuGPT 🐛 xin chào! Bạn cần gì?");
+    systemPrompt = "Bạn là SâuGPT 🐛 — chuyên gia lập trình (đặc biệt là Lua Roblox nhưng hiểu Python, HTML, JS...). Luôn trả lời thân thiện.";
   }
-}
 
-function checkKey() {
-  const key = document.getElementById("adminKey").value;
-  if (key === "admin0999") {
-    adminUnlocked = true;
-    document.getElementById("consoleContainer").classList.remove("hidden");
-    appendMessage("bot", "🔓 Đã mở khóa console admin!");
-  } else {
-    alert("❌ Sai key!");
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, systemPrompt })
+    });
+
+    const data = await res.json();
+    addMessage("bot", data.reply || "❌ Lỗi server!");
+  } catch (e) {
+    addMessage("bot", "❌ Lỗi kết nối server!");
   }
-}
-
-function toggleConsole() {
-  consoleVisible = !consoleVisible;
-  document.getElementById("adminConsole").classList.toggle("hidden");
-}
-
-function logAdmin(msg) {
-  const consoleEl = document.getElementById("adminConsole");
-  consoleEl.textContent += msg + "\n";
-}
+});
