@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SâuGPT 🐛</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
-    <h1>SâuGPT 🐛</h1>
-
-    <div class="key-container">
-      <input type="password" id="adminKey" placeholder="Nhập key để mở console...">
-      <button onclick="checkKey()">Xác nhận</button>
-    </div>
-
-    <div id="consoleContainer" class="hidden">
-      <h3>🔐 Logs Admin</h3>
-      <button onclick="toggleConsole()">Ẩn/Hiện Console</button>
-      <pre id="adminConsole"></pre>
-    </div>
-
-    <div id="chatContainer">
-      <div id="messages"></div>
-      <div class="input">
-        <input id="userInput" type="text" placeholder="Nhập tin nhắn...">
-        <button onclick="sendMessage()">Gửi</button>
-      </div>
+  <!-- Màn hình chọn chế độ -->
+  <div id="mode-select">
+    <h1>Chọn chế độ 👇</h1>
+    <div class="mode-buttons">
+      <button id="genzMode">🔥 GenZ Mode</button>
+      <button id="coderMode">👨‍💻 Coder Mode</button>
     </div>
   </div>
+
+  <!-- Màn hình chat -->
+  <div id="chat-screen" class="hidden">
+    <div class="chat-header">
+      <h2>SâuGPT 🐛</h2>
+    </div>
+    <div id="chat"></div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Nhập tin nhắn..." />
+      <button id="send">Gửi</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
