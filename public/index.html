@@ -1,30 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>SâuGPT 🐛</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Màn hình chọn chế độ -->
   <div id="mode-select">
-    <h1>Chọn chế độ 👇</h1>
-    <div class="mode-buttons">
-      <button id="genzMode">🔥 GenZ Mode</button>
-      <button id="coderMode">👨‍💻 Coder Mode</button>
-    </div>
+    <h1>Chọn chế độ</h1>
+    <button onclick="setMode('genz')">🔥 GenZ Mode</button>
+    <button onclick="setMode('coder')">👨‍💻 Coder Mode</button>
   </div>
 
-  <!-- Màn hình chat -->
-  <div id="chat-screen" class="hidden">
-    <div class="chat-header">
-      <h2>SâuGPT 🐛</h2>
+  <div id="chat-container" class="hidden">
+    <div id="chat-box"></div>
+    <div id="input-area">
+      <input id="user-input" type="text" placeholder="Nhập tin nhắn...">
+      <button onclick="sendMessage()">Gửi</button>
     </div>
-    <div id="chat"></div>
-    <div class="chat-input">
-      <input type="text" id="user-input" placeholder="Nhập tin nhắn..." />
-      <button id="send">Gửi</button>
+    <div id="admin-panel">
+      <input id="admin-key" type="password" placeholder="Nhập key admin">
+      <button onclick="viewLogs()">Xem Logs</button>
+      <pre id="logs-output"></pre>
     </div>
   </div>
 
