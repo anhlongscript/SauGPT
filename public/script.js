@@ -1,56 +1,75 @@
-let mode = null; // GenZ hoặc Coder
+let mode = null;
 
-document.getElementById("genzMode").addEventListener("click", () => {
-  mode = "genz";
-  startChat();
-});
-
-document.getElementById("coderMode").addEventListener("click", () => {
-  mode = "coder";
-  startChat();
-});
-
-function startChat() {
+function setMode(selected) {
+  mode = selected;
   document.getElementById("mode-select").classList.add("hidden");
-  document.getElementById("chat-screen").classList.remove("hidden");
-  addMessage("bot", "🐛 Xin chào! Bạn đã chọn " + (mode === "genz" ? "🔥 GenZ Mode" : "👨‍💻 Coder Mode"));
+  document.getElementById("chat-container").classList.remove("hidden");
 }
 
 function addMessage(sender, text) {
-  const chat = document.getElementById("chat");
+  const chatBox = document.getElementById("chat-box");
   const msg = document.createElement("div");
-  msg.classList.add("message", sender);
-  msg.textContent = (sender === "user" ? "Bạn: " : "SâuGPT: ") + text;
-  chat.appendChild(msg);
-  chat.scrollTop = chat.scrollHeight;
+  msg.className = "message " + (sender === "Bạn" ? "user" : "bot");
+
+  // check nếu có code block
+  if (text.includes("```")) {
+    const parts = text.split(/```/);
+    msg.innerHTML = `<b>${sender}:</b><br>` + parts.map((p, i) =>
+      i % 2 === 1
+        ? `<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>${p}</pre></div>`
+        : p
+    ).join("");
+  } else {
+    msg.innerHTML = `<b>${sender}:</b> ${text}`;
+  }
+
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-document.getElementById("send").addEventListener("click", async () => {
+async function sendMessage() {
   const input = document.getElementById("user-input");
-  const message = input.value.trim();
-  if (!message) return;
-
-  addMessage("user", message);
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage("Bạn", text);
   input.value = "";
-
-  // API gọi theo mode
-  let systemPrompt = "";
-  if (mode === "genz") {
-    systemPrompt = "Bạn là SâuGPT 🐛 ở chế độ GenZ. Trả lời kiểu vui tính, cà khịa, dùng icon.";
-  } else {
-    systemPrompt = "Bạn là SâuGPT 🐛 — chuyên gia lập trình (đặc biệt là Lua Roblox nhưng hiểu Python, HTML, JS...). Luôn trả lời thân thiện.";
-  }
 
   try {
     const res = await fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, systemPrompt })
+      body: JSON.stringify({ message: text, mode })
     });
-
     const data = await res.json();
-    addMessage("bot", data.reply || "❌ Lỗi server!");
-  } catch (e) {
-    addMessage("bot", "❌ Lỗi kết nối server!");
+    addMessage("SâuGPT", data.reply || "❌ Lỗi server!");
+  } catch {
+    addMessage("SâuGPT", "❌ Lỗi kết nối server!");
   }
-});
+}
+
+function copyCode(btn) {
+  const code = btn.nextElementSibling.innerText;
+  navigator.clipboard.writeText(code);
+  btn.innerText = "Đã copy!";
+  setTimeout(() => btn.innerText = "Copy", 1500);
+}
+
+async function viewLogs() {
+  const key = document.getElementById("admin-key").value;
+  const output = document.getElementById("logs-output");
+  try {
+    const res = await fetch("/admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key })
+    });
+    const data = await res.json();
+    if (data.logs) {
+      output.textContent = JSON.stringify(data.logs, null, 2);
+    } else {
+      output.textContent = "❌ Sai key!";
+    }
+  } catch {
+    output.textContent = "❌ Lỗi kết nối server!";
+  }
+}
