@@ -1,27 +1,55 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>SâuGPT 🐛</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sâu GPT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div id="mode-select">
-    <h1>Chọn chế độ</h1>
-    <button onclick="setMode('genz')">🔥 GenZ Mode</button>
-    <button onclick="setMode('coder')">👨‍💻 Coder Mode</button>
+<body class="dark">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <button id="closeSidebar">✖</button>
+      <h2>Menu</h2>
+    </div>
+    <ul>
+      <li id="newChat">➕ Đoạn chat mới</li>
+      <li id="setNickname">✍️ Đặt biệt danh</li>
+    </ul>
   </div>
 
-  <div id="chat-container" class="hidden">
-    <div id="chat-box"></div>
-    <div id="input-area">
-      <input id="user-input" type="text" placeholder="Nhập tin nhắn...">
-      <button onclick="sendMessage()">Gửi</button>
-    </div>
-    <div id="admin-panel">
-      <input id="admin-key" type="password" placeholder="Nhập key admin">
-      <button onclick="viewLogs()">Xem Logs</button>
-      <pre id="logs-output"></pre>
+  <!-- Overlay khi mở sidebar -->
+  <div id="overlay"></div>
+
+  <!-- Thanh top -->
+  <header>
+    <button id="menuBtn">☰</button>
+    <h1 id="title">Sâu GPT</h1>
+    <button id="themeToggle" class="theme-btn">🌙</button>
+  </header>
+
+  <!-- Khung chat -->
+  <main id="chatContainer">
+    <div id="chat"></div>
+  </main>
+
+  <!-- Ô nhập -->
+  <footer>
+    <input type="text" id="userInput" placeholder="Nhập tin nhắn..." />
+    <button id="sendBtn">➤</button>
+  </footer>
+
+  <!-- Popup đặt biệt danh -->
+  <div id="nicknameModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Đặt biệt danh</h2>
+      <label>Chúng tôi nên gọi bạn là:</label>
+      <input type="text" id="userNickname" placeholder="Tên của bạn..." />
+      <label>Đặt tên cho Sâu GPT:</label>
+      <input type="text" id="botNickname" placeholder="Tên cho bot..." />
+      <button id="saveNickname">Lưu</button>
     </div>
   </div>
 
