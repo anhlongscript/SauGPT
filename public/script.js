@@ -1,75 +1,99 @@
-let mode = null;
+const chatEl = document.getElementById("chat");
+const userInput = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const menuBtn = document.getElementById("menuBtn");
+const closeSidebar = document.getElementById("closeSidebar");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const setNicknameBtn = document.getElementById("setNickname");
+const newChatBtn = document.getElementById("newChat");
+const nicknameModal = document.getElementById("nicknameModal");
+const closeModal = document.querySelector(".modal .close");
+const saveNickname = document.getElementById("saveNickname");
+const userNicknameInput = document.getElementById("userNickname");
+const botNicknameInput = document.getElementById("botNickname");
+const title = document.getElementById("title");
+const themeToggle = document.getElementById("themeToggle");
 
-function setMode(selected) {
-  mode = selected;
-  document.getElementById("mode-select").classList.add("hidden");
-  document.getElementById("chat-container").classList.remove("hidden");
-}
+let userNickname = "Bạn";
+let botNickname = "Sâu GPT";
 
-function addMessage(sender, text) {
-  const chatBox = document.getElementById("chat-box");
+// Xử lý gửi tin nhắn
+function addMessage(text, sender) {
   const msg = document.createElement("div");
-  msg.className = "message " + (sender === "Bạn" ? "user" : "bot");
-
-  // check nếu có code block
-  if (text.includes("```")) {
-    const parts = text.split(/```/);
-    msg.innerHTML = `<b>${sender}:</b><br>` + parts.map((p, i) =>
-      i % 2 === 1
-        ? `<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><pre>${p}</pre></div>`
-        : p
-    ).join("");
-  } else {
-    msg.innerHTML = `<b>${sender}:</b> ${text}`;
-  }
-
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  msg.classList.add("message", sender);
+  msg.textContent = text;
+  chatEl.appendChild(msg);
+  chatEl.scrollTop = chatEl.scrollHeight;
 }
 
-async function sendMessage() {
-  const input = document.getElementById("user-input");
-  const text = input.value.trim();
+function sendMessage() {
+  const text = userInput.value.trim();
   if (!text) return;
-  addMessage("Bạn", text);
-  input.value = "";
+  addMessage(`${userNickname}: ${text}`, "user");
 
-  try {
-    const res = await fetch("/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, mode })
-    });
-    const data = await res.json();
-    addMessage("SâuGPT", data.reply || "❌ Lỗi server!");
-  } catch {
-    addMessage("SâuGPT", "❌ Lỗi kết nối server!");
+  // Giả lập trả lời từ bot
+  setTimeout(() => {
+    addMessage(`${botNickname}: Tôi đã nhận được: "${text}"`, "bot");
+  }, 500);
+
+  userInput.value = "";
+}
+
+sendBtn.addEventListener("click", sendMessage);
+userInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+// Sidebar toggle
+menuBtn.addEventListener("click", () => {
+  sidebar.classList.add("active");
+  overlay.classList.add("active");
+});
+closeSidebar.addEventListener("click", () => {
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+});
+overlay.addEventListener("click", () => {
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+});
+
+// New chat
+newChatBtn.addEventListener("click", () => {
+  chatEl.innerHTML = "";
+  addMessage(`${botNickname}: Xin chào! Hãy bắt đầu một đoạn chat mới 😊`, "bot");
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+});
+
+// Nickname modal
+setNicknameBtn.addEventListener("click", () => {
+  nicknameModal.style.display = "flex";
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+});
+
+closeModal.addEventListener("click", () => {
+  nicknameModal.style.display = "none";
+});
+
+saveNickname.addEventListener("click", () => {
+  if (userNicknameInput.value) userNickname = userNicknameInput.value;
+  if (botNicknameInput.value) {
+    botNickname = botNicknameInput.value;
+    title.textContent = botNickname;
   }
-}
+  nicknameModal.style.display = "none";
+});
 
-function copyCode(btn) {
-  const code = btn.nextElementSibling.innerText;
-  navigator.clipboard.writeText(code);
-  btn.innerText = "Đã copy!";
-  setTimeout(() => btn.innerText = "Copy", 1500);
-}
-
-async function viewLogs() {
-  const key = document.getElementById("admin-key").value;
-  const output = document.getElementById("logs-output");
-  try {
-    const res = await fetch("/admin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key })
-    });
-    const data = await res.json();
-    if (data.logs) {
-      output.textContent = JSON.stringify(data.logs, null, 2);
-    } else {
-      output.textContent = "❌ Sai key!";
-    }
-  } catch {
-    output.textContent = "❌ Lỗi kết nối server!";
+// Theme toggle
+themeToggle.addEventListener("click", () => {
+  if (document.body.classList.contains("dark")) {
+    document.body.classList.replace("dark", "light");
+    themeToggle.textContent = "☀️";
+  } else {
+    document.body.classList.replace("light", "dark");
+    themeToggle.textContent = "🌙";
   }
-}
+});
