@@ -1,59 +1,69 @@
 import express from "express";
 import fetch from "node-fetch";
-import bodyParser from "body-parser";
-import dotenv from "dotenv";
-
-dotenv.config();
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.OPENAI_API_KEY;
+app.use(express.json());
 
-app.use(bodyParser.json());
-app.use(express.static("public")); // để load index.html, style.css, script.js
+// setup static
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, "public")));
 
-app.post("/api/chat", async (req, res) => {
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const ADMIN_KEY = "admin0999";
+
+// store logs
+let logs = [];
+
+// API chat
+app.post("/chat", async (req, res) => {
+  const { message, mode } = req.body;
+  if (!message) return res.status(400).json({ error: "Thiếu message!" });
+
   try {
-    const { message, history } = req.body;
-
-    // Prompt hệ thống (đã fix lỗi cú pháp)
-    const systemPrompt = `Bạn là SâuGPT 🐛 — trợ lý chuyên về code (đặc biệt là Lua cho Roblox).
-Luôn trả lời thân thiện, có biểu tượng cảm xúc phù hợp, xưng hô theo biệt danh người dùng nếu họ đã đặt.
-Khi người dùng yêu cầu code, hãy xuất đoạn code trong khung \`\`\`lua ... \`\`\``;
-
-    // Định dạng messages gửi OpenAI
-    const payloadMessages = [
-      { role: "system", content: systemPrompt },
-      ...(Array.isArray(history) ? history : []),
-      { role: "user", content: message }
-    ];
+    const systemPrompt =
+      mode === "genz"
+        ? "Bạn là SâuGPT 🐛 GenZ, trả lời kiểu cà khịa, hài hước, meme, ngắn gọn."
+        : "Bạn là SâuGPT 🐛 Coder, chuyên về code (ưu tiên Lua cho Roblox nhưng hiểu nhiều ngôn ngữ khác). Luôn trả lời với code trong ```...``` nếu có.";
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // model nhẹ, nhanh
-        messages: payloadMessages
-      })
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message },
+        ],
+      }),
     });
 
     const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "❌ Lỗi server!";
+    logs.push({ user: message, bot: reply, mode, time: new Date() });
 
-    if (data.error) {
-      return res.status(500).json({ reply: `❌ Lỗi: ${data.error.message}` });
-    }
-
-    const reply = data.choices?.[0]?.message?.content || "❌ Không có phản hồi!";
     res.json({ reply });
   } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ reply: "❌ Lỗi server!" });
+    console.error(err);
+    res.status(500).json({ error: "Server lỗi!" });
   }
 });
 
+// admin logs
+app.post("/admin", (req, res) => {
+  const { key } = req.body;
+  if (key === ADMIN_KEY) {
+    return res.json({ logs });
+  }
+  return res.status(403).json({ error: "Sai key!" });
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 SâuGPT chạy ở http://localhost:${PORT}`);
+  console.log(`✅ Server chạy tại cổng ${PORT}`);
 });
